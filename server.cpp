@@ -25,7 +25,7 @@ int main() {
   sockaddr.sin_addr.s_addr = INADDR_ANY;
   sockaddr.sin_port = htons(PORT); // htons is necessary to convert a number to
                                    // network byte order
-  if (bind(sockfd, reinterpret_cast<struct sockaddr *>(&sockaddr), sizeof(sockaddr)) < 0) 
+  if (bind(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) 
   {
     std::cout << "Failed to bind to port " << PORT << ". errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
@@ -36,5 +36,14 @@ int main() {
 	std::cout << "Failed to listen on socket " << PORT << ". errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
   }
+
+	int connection;
+
+	if ((connection = accept(sockfd,(struct sockaddr *)&sockaddr,(socklen_t * )sizeof(sockaddr)) < 0))
+	{
+		std::cout << "Failed to grab connection. errno: " << errno << std::endl;
+    	exit(EXIT_FAILURE);
+	}
+	
 }
 
