@@ -1,6 +1,6 @@
 SRC = server.cpp
 CC = clang++
-CFLAGS =  -std=c++98 -fsanitize=address #-Wall -Werror -Wextra
+CFLAGS =  -std=c++98 #-fsanitize=address #-Wall -Werror -Wextra
 NAME = belloServ
 OBJS = ${SRC:.cpp=.o}
 
