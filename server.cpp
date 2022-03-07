@@ -7,6 +7,7 @@
 #include <unistd.h> // For read
 #include <errno.h>
 #include <vector>
+#include <cstdio>
 
 
 
@@ -119,24 +120,27 @@ std::string get_image(std::string file_path, Response &response)
 {
 	file_path.erase(0,1);
 	std::ifstream ifs(file_path.c_str(), std::ios::binary);
+	
 
-	std::cout << "image path : "<<  file_path << std::endl << std::endl;
-	if (!ifs.is_open() ) 
-	{
-        std::cerr << "could not open input file" << std::endl;
-        return std::string();
-    }
+    FILE* file_stream = fopen(file_path.c_str(), "rb");
+    std::string file_str;
+    size_t file_size;
 
-	std::vector<std::string> lines;
-    std::string line;
-    while(std::getline( ifs, line ) ) 
-        lines.push_back( line );
-    
+    if(!file_stream)
+    	printf("file_stream is null! file name -> %s\n", file_path.c_str());
+	
+	fseek(file_stream, 0, SEEK_END);
+	response.content_lenght = ftell(file_stream);
+	rewind(file_stream);
+
+	char buffer[response.content_lenght];
+	file_size = fread(buffer, 1, response.content_lenght, file_stream);
 	std::stringstream ss;
-	for ( unsigned int i = 0; i < lines.size(); i++ ) 
-        ss << lines[i]; 
-	std::string result = ss.str();
-	return result;
+	for(int i = 0; i < file_size; i++)
+		ss << buffer[i];
+
+	return ss.str();
+
 }
 
 std::string get_file_path(std::string &request)
@@ -248,6 +252,13 @@ int main(int argc, char **argv) {
 
 
 		std::string request = buffer;
+		if (request.empty())
+		{
+			std::cout << "request is empty" << buffer << std::endl;
+			close(connection);
+			continue;
+		}
+			
 		std::string response = create_response(request);
 								
 		send(connection,response.c_str(),response.size(),0);
