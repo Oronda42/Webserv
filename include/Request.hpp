@@ -8,7 +8,7 @@ struct Request
 	int type;
 	std::string request;
 	std::string filePath;
-	Request(int type, std::string request) : type(type), request(request), filePath(Utils::get_file_path(request))
+	Request(int type, std::string request) : request(request), filePath(Utils::get_file_path(request))
 	{
 
 	}

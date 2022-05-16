@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <vector>
 #include <cstdio>
+#include "../include/Request.hpp"
+#include "../include/Response.hpp"
 
 
 #define PORT 8080
@@ -89,8 +91,10 @@ int main(int argc, char const *argv[])
 			close(connection);
 			continue;
 		}
-			
-		std::string response = create_response(request);
+		
+		Request r(buffer);
+		Response response(r);
+		//std::string response = create_response(request);
 								
 		send(connection,response.c_str(),response.size(),0);
 		close(connection);

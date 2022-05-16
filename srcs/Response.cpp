@@ -1,5 +1,7 @@
-#include "../includes/Response.hpp"
-#include "../includes/Request.hpp"
+#include "../include/Response.hpp"
+#include "../include/Request.hpp"
+
+#include <sstream>
 
 	
 Response::Response(int type) : type(type), content_lenght(0)

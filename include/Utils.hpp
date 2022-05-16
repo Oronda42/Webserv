@@ -2,6 +2,10 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
+#include <fstream>
+#include <sstream>
+
+
 
 class Utils
 {
@@ -11,12 +15,12 @@ class Utils
 		std::string get_document(std::string file_path, Response &response);
 
 
-		 std::string get_first_line(std::string &str)
+		static std::string get_first_line(std::string &str)
 		{	
 			return str.substr(0, str.find('\r'));
 		}
 
-		 static std::vector<std::string> split(const std::string& s, char seperator)
+		static std::vector<std::string> split(const std::string& s, char seperator)
 		{
 			std::vector<std::string> output;
 
@@ -36,7 +40,7 @@ class Utils
 			return output;
 		}
 
-		std::string get_document(std::string file_path, Response &response)
+		static std::string get_document(std::string file_path, Response &response)
 		{
 			
 			file_path.erase(0,1);
@@ -65,7 +69,7 @@ class Utils
 			return result;
 		}
 
-		std::string get_image(std::string file_path, Response &response)
+		static std::string get_image(std::string file_path, Response &response)
 		{
 			file_path.erase(0,1);
 			std::ifstream ifs(file_path.c_str(), std::ios::binary);
@@ -92,7 +96,7 @@ class Utils
 
 		}
 
-		std::string get_file_path(std::string &request)
+		static std::string get_file_path(std::string &request)
 		{
 			std::string first_line = get_first_line(request);
 			std::vector<std::string> splited_fl = split(first_line, ' ');

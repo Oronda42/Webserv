@@ -1,8 +1,9 @@
-SRC = server.cpp
+SRC = srcs/main.cpp srcs/MimeParser.cpp srcs/Request.cpp srcs/Response.cpp
 CC = clang++
-CFLAGS =  -std=c++98 #-fsanitize=address #-Wall -Werror -Wextra
+CFLAGS =  -std=c++98 -Iinclude/#-fsanitize=address #-Wall -Werror -Wextra
 NAME = belloServ
 OBJS = ${SRC:.cpp=.o}
+INCLUDE = /includes
 
 ${NAME} : ${OBJS}
 	${CC} ${CFLAGS} ${OBJS} -o ${NAME}
