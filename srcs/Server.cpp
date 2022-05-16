@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                       .-.                       .                          */
+/*                      / -'                      /                           */
+/*       .  .-. .-.   -/--).--..-.  .  .-. .-.   /-.  .-._.)  (               */
+/*        )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )         .    */
+/*   By: '/   /   (`.'  /      `-'-.-/   /.- (.''--'`-`-'  `--':        /     */
+/*                  -'            (   \  / .-._.).--..-._..  .-.  .-../ .-.   */
+/*   Created: 16-05-2022  by       `-' \/ (   )/    (   )  )/   )(   / (  |   */
+/*   Updated: 16-05-2022 10:52 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*                                 `._;  `._;                   `-            */
+/* ************************************************************************** */
+
 #include <sys/socket.h> // For socket functions
 #include <netinet/in.h> // For sockaddr_in
 #include <cstdlib> // For exit() and EXIT_FAILURE
@@ -23,40 +35,89 @@
 
 struct Request;
 struct Response;
-std::string get_file_path(std::string &request);
+
 std::string get_image(std::string file_path, Response &response);
 std::string get_document(std::string file_path, Response &response);
 
-struct Request
+
+
+struct Response
 {
 	int type;
-	std::string rawRequest;
-	std::string filePath;
-	Request(int type, std::string rawRequest) : type(type), rawRequest(rawRequest), filePath(get_file_path(rawRequest)){}
+	std::string content_type;
+	int content_lenght;
+	std::string (*get_content)(std::string, Response&);
+
+	Response(int type) : type(type), content_lenght(0)
+	{
+		if (type == DOCUMENT)
+		{
+			content_type = "text/html";
+			get_content = &get_document;
+		}
+			
+		if (type == IMAGE)
+		{
+			content_type = "image";
+			get_content = &get_image;
+		}	
+	}
 };
 
-// struct Response
-// {
-// 	int type;
-// 	std::string content_type;
-// 	int content_lenght;
-// 	std::string (*get_content)(std::string, Response&);
 
-// 	Response(int type) : type(type), content_lenght(0)
-// 	{
-// 		if (type == DOCUMENT)
-// 		{
-// 			content_type = "text/html";
-// 			get_content = &get_document;
-// 		}
-			
-// 		if (type == IMAGE)
-// 		{
-// 			content_type = "image";
-// 			get_content = &get_image;
-// 		}	
-// 	}
-// };
+std::string get_first_line(std::string &str)
+{	
+	return str.substr(0, str.find('\r'));
+}
+
+std::vector<std::string> split(const std::string& s, char seperator)
+{
+   std::vector<std::string> output;
+
+    std::string::size_type prev_pos = 0, pos = 0;
+
+    while((pos = s.find(seperator, pos)) != std::string::npos)
+    {
+        std::string substring(s.substr(prev_pos, pos-prev_pos));
+
+        output.push_back(substring);
+
+        prev_pos = ++pos;
+    }
+
+    output.push_back(s.substr(prev_pos, pos-prev_pos)); // Last word
+
+    return output;
+}
+
+std::string get_document(std::string file_path, Response &response)
+{
+	
+	file_path.erase(0,1);
+	std::ifstream ifs(file_path.c_str());
+
+	std::cout << "document path : "<<  file_path << std::endl << std::endl;
+	if (!ifs.is_open() ) 
+	{
+        std::cerr << "could not open input file" << std::endl;
+        return std::string();
+    }
+
+	std::vector<std::string> lines;
+    std::string line;
+    while(std::getline(ifs, line)) 
+	{
+		response.content_lenght += line.size();
+		lines.push_back(line);
+	}
+        
+    
+	std::stringstream ss;
+	for (int i = 0; i < lines.size(); i++ ) 
+        ss << lines[i]; 
+	std::string result = ss.str();
+	return result;
+}
 
 std::string get_image(std::string file_path, Response &response)
 {
@@ -85,16 +146,6 @@ std::string get_image(std::string file_path, Response &response)
 
 }
 
-std::string get_file_path(std::string &request)
-{
-	std::string first_line = get_first_line(request);
-	std::vector<std::string> splited_fl = split(first_line, ' ');
-
-	if (!splited_fl[1].compare("/"))
-		return (ROOT);
-	std::string file_path = splited_fl[1];
-	return file_path;
-}
 
 Request parse_request(std::string &request)
 {
@@ -214,7 +265,3 @@ int main(int argc, char **argv) {
 
 	close(sockfd);
 }
-
-
-
-
