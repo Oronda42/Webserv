@@ -6,27 +6,35 @@
 /*   By: '/   /   (`.'  /      `-'-.-/   /.- (.''--'`-`-'  `--':        /     */
 /*                  -'            (   \  / .-._.).--..-._..  .-.  .-../ .-.   */
 /*   Created: 16-05-2022  by       `-' \/ (   )/    (   )  )/   )(   / (  |   */
-/*   Updated: 16-05-2022 11:30 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*   Updated: 16-05-2022 16:07 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                 `._;  `._;                   `-            */
 /* ************************************************************************** */
 
-#ifndef RESPONSE_HPP
-# define RESPONSE_HPP
+
+#ifndef MIMEPARSER_HPP
+# define MIMEPARSER_HPP
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <vector>
+#include <map>
+#include <exception>
+#include <string>
 
-struct Response
+class MimeParser
 {
-	int type;
-	std::string content_type;
-	int content_lenght;
-	std::string (*get_content)(std::string, Response&);
+	public:
+		// Associates extension with content-type
+		typedef std::map<std::string, std::string> mimeMap_t;
 
-	std::string getDocumentContent(std::string file_path);
+	private:
+		std::string _mimeFile;
+		mimeMap_t   _mimeMap;
+
+		MimeParser();
+		void parseMimeFile(const std::string &mimeFile);
+
+	public:
+		MimeParser(const std::string& mimeFile);
 };
-
 
 #endif
