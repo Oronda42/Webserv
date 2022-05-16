@@ -9,9 +9,6 @@
 #include <vector>
 #include <cstdio>
 
-
-
-
 #define PORT 8080
 #define NB_OF_CLIENTS 10
 
@@ -25,38 +22,64 @@ struct Request;
 struct Response;
 std::string get_file_path(std::string &request);
 std::string get_image(std::string file_path, Response &response);
-std::string get_document(std::string file_path, Response &response);
 
 struct Request
 {
 	int type;
-	std::string rawRequest;
+	std::string request;
 	std::string filePath;
-	Request(int type, std::string rawRequest) : type(type), rawRequest(rawRequest), filePath(get_file_path(rawRequest)){}
+	Request(int type, std::string request) : type(type), request(request), filePath(get_file_path(request)){}
 };
 
-// struct Response
-// {
-// 	int type;
-// 	std::string content_type;
-// 	int content_lenght;
-// 	std::string (*get_content)(std::string, Response&);
+struct Response
+{
+	
+	int type;
+	std::string content_type;
+	int content_lenght;
+	std::string (*get_content)(std::string, Response&);
 
-// 	Response(int type) : type(type), content_lenght(0)
-// 	{
-// 		if (type == DOCUMENT)
-// 		{
-// 			content_type = "text/html";
-// 			get_content = &get_document;
-// 		}
+	Response(int type) : type(type), content_lenght(0)
+	{
+		if (type == DOCUMENT)
+		{
+			content_type = "text/html";
+			get_content = &get_image;
+		}
 			
-// 		if (type == IMAGE)
-// 		{
-// 			content_type = "image";
-// 			get_content = &get_image;
-// 		}	
-// 	}
-// };
+		if (type == IMAGE)
+		{
+			content_type = "image";
+			get_content = &get_image;
+		}	
+	}
+};
+
+
+std::string get_first_line(std::string &str)
+{	
+	return str.substr(0, str.find('\r'));
+}
+
+std::vector<std::string> split(const std::string& s, char seperator)
+{
+   std::vector<std::string> output;
+
+    std::string::size_type prev_pos = 0, pos = 0;
+
+    while((pos = s.find(seperator, pos)) != std::string::npos)
+    {
+        std::string substring(s.substr(prev_pos, pos-prev_pos));
+
+        output.push_back(substring);
+
+        prev_pos = ++pos;
+    }
+
+    output.push_back(s.substr(prev_pos, pos-prev_pos)); // Last word
+
+    return output;
+}
 
 std::string get_image(std::string file_path, Response &response)
 {
@@ -146,7 +169,7 @@ int main(int argc, char **argv) {
 
 	const int trueFlag = 1;
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
-			std::cout << "sockopt failed " << errno << std::endl;
+		 std::cout << "sockopt failed " << errno << std::endl;
 
   // Listen to port 8080 on any address
   sockaddr_in sockaddr;
@@ -159,7 +182,7 @@ int main(int argc, char **argv) {
     std::cout << "Failed to bind to port " << PORT << ". errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
   }
-  else
+   else
 	std::cout << "Binding socket : "<<  sockfd << std::endl;
 
   if(listen(sockfd,NB_OF_CLIENTS) < 0)
