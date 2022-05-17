@@ -12,8 +12,6 @@ std::string Response::generateResponse()
 	std::string content = Utils::getRawDocumentContent(this->_request.getFilePath());
 	std::stringstream ss;
 
-	MimeParser mimeParser(MIME_MAP_FILE);
-
 	ss << firstHeader << std::endl; //TODO
 	ss << "Content-Type: " << mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())] << std::endl;
 	ss << "Content-Length: " << content.length() << std::endl;

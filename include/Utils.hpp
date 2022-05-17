@@ -49,7 +49,7 @@ class Utils
 			std::stringstream ss;
 
 			if(!ifs.is_open())
-				throw std::runtime_error("File stream is null, pouet pouet");
+				throw std::runtime_error("File stream is null, file not found, crashing lolilol");
 			
 			ss << ifs.rdbuf();		
 			ifs.close();

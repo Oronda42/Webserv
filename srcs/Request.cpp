@@ -3,7 +3,8 @@
 
 Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest), _filePath(Utils::getFilePath(rawRequest))
 {
-	this->_filePath.erase(0, 1); // remove starting '/'
+	if (this->_filePath.length() >= 1 && this->_filePath.at(0) == '/')
+		this->_filePath.erase(0, 1); // remove starting '/'
 }
 
 std::string Request::getFilePath() const { return this->_filePath; }

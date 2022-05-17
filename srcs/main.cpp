@@ -20,10 +20,13 @@
 #define DOCUMENT 0
 #define IMAGE 1
 
-
+MimeParser mimeParser(MIME_MAP_FILE);
 
 int main(int argc, char const *argv[])
 {
+
+	// Only need 1 mimeParser
+	mimeParser = MimeParser(MIME_MAP_FILE);
 	
   // Create a socket (IPv4, TCP)
   int sockfd = socket(AF_INET, SOCK_STREAM,0);
@@ -96,7 +99,9 @@ int main(int argc, char const *argv[])
 		Response response(req);
 		//std::string response = create_response(request);
 								
-		send(connection,response.generateResponse().c_str(),response.generateResponse().size(),0);
+		std::string responseStr = response.generateResponse();
+
+		send(connection, responseStr.c_str(), responseStr.size(),0);
 		close(connection);
 
 	}
