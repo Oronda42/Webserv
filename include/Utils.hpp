@@ -19,22 +19,20 @@ class Utils
 			return str.substr(0, str.find('\r'));
 		}
 
-		static std::vector<std::string> split(const std::string& s, char seperator)
+		static std::vector<std::string> split(const std::string& s, char separator)
 		{
 			std::vector<std::string> output;
+			std::string::size_type end = 0, start = 0;
 
-			std::string::size_type prev_pos = 0, pos = 0;
-
-			while((pos = s.find(seperator, pos)) != std::string::npos)
+			while ((start = s.find_first_not_of(separator, start)) != s.npos)
 			{
-				std::string substring(s.substr(prev_pos, pos-prev_pos));
-
-				output.push_back(substring);
-
-				prev_pos = ++pos;
+				end = s.find_first_of(separator, start);
+				// End of string
+				if (end == s.npos)
+					end = s.size();
+				output.push_back(s.substr(start, end - start));
+				start = end;
 			}
-
-			output.push_back(s.substr(prev_pos, pos-prev_pos)); // Last word
 
 			return output;
 		}
