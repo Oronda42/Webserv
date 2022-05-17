@@ -63,7 +63,7 @@ int main(int argc, char const *argv[])
     exit(EXIT_FAILURE);
   }
   else
-	std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl;
+	std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;
 
 	while(1)
 	{
@@ -85,7 +85,11 @@ int main(int argc, char const *argv[])
 			std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
 		}
 
-		std::cout << "server received : " << buffer << std::endl;
+		std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
+
+		std::cout << buffer;
+
+		std::cout << "***************************************************************************" << std::endl << std::endl;
 
 
 		std::string request = buffer;
@@ -102,8 +106,13 @@ int main(int argc, char const *argv[])
 								
 		std::string responseStr = response.generateResponse();
 
+		std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
+
+		std::cout << responseStr.c_str();
 		send(connection, responseStr.c_str(), responseStr.size(),0);
 		close(connection);
+
+		std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;
 
 	}
 

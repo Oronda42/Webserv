@@ -13,11 +13,13 @@ class Response
 		int         _contentLength;
 		Request     _request;
 		int         _code;
+		std::string _status;
 
 
 	public:
 		Response(const Request &request);
 		std::string generateResponse();
+		
 
 };
 

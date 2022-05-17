@@ -41,6 +41,7 @@ class Utils
 
 		static std::string getRawDocumentContent(std::string file_path)
 		{
+			
 			std::cout << "Getting file : " << file_path << std::endl;
 			//file_path.erase(0,1);
 			std::ifstream     ifs(file_path.c_str(), std::ios::binary);

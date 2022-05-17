@@ -6,7 +6,7 @@
 /*   By: oronda <oronda@student.42nice.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 17-05-2022 15:31 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*   Updated: 2022/05/17 19:57:11 by oronda           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,17 +34,18 @@ void MimeParser::parseMimeFile(const std::string &mimeFile)
 
 		// From first space to ending ';' both excluded, then split on space for all extensions with same type
 		std::string extensionsStr = line.substr(line.find_first_of(' ') + 1);
-		extensionsStr.pop_back(); // Remove ';' at the end
+		//extensionsStr.pop_back(); // Remove ';' at the end
+		extensionsStr.erase(extensionsStr.length() - 1);
 		std::vector<std::string> extensionsVec = Utils::split(extensionsStr, ' ');
 
 		for (std::vector<std::string>::const_iterator it = extensionsVec.begin(); it != extensionsVec.end(); ++it)
 		{
 			std::string extension = *it;
-			std::cout << "Extension '" << extension << "' has content-type '" << contentType << "'" << std::endl;
+			//std::cout << "Extension '" << extension << "' has content-type '" << contentType << "'" << std::endl;
 			this->mimeMap[extension] = contentType;
 		}
 	}
-	std::cout << "Found " << this->mimeMap.size() << " extensions\n";
+	//std::cout << "Found " << this->mimeMap.size() << " extensions\n";
 	ifs.close();
 }
 

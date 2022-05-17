@@ -33,13 +33,13 @@ void HttpCodesParser::parseHttpCodesFile(const std::string &httpCodesFile)
 			throw InvalidFileException();
 
 		std::string httpCode = line.substr(line.find_last_of(' ') + 1);
-		httpCode.pop_back(); // Remove ';' at the end
-
-		std::cout << "Http code '" << httpCode << "' description is '" << description << "'" << std::endl;
+		//httpCode.pop_back(); // Remove ';' at the end
+		httpCode.erase(httpCode.length() - 1);
+		//std::cout << "Http code '" << httpCode << "' description is '" << description << "'" << std::endl;
 		this->httpCodesMap[httpCode] = description;
 
 	}
-	std::cout << "Found " << this->httpCodesMap.size() << " http codes\n";
+	//std::cout << "Found " << this->httpCodesMap.size() << " http codes\n";
 	ifs.close();
 }
 
