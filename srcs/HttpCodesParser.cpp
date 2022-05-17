@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   MimeParser.cpp                                     :+:      :+:    :+:   */
+/*   HttpCodeParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: oronda <oronda@student.42nice.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,11 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/MimeParser.hpp"
+#include "../include/HttpCodesParser.hpp"
 
-void MimeParser::parseMimeFile(const std::string &mimeFile)
+void HttpCodesParser::parseHttpCodesFile(const std::string &httpCodesFile)
 {
-	std::ifstream ifs(mimeFile.c_str(), std::ios::binary);
+	std::ifstream ifs(httpCodesFile.c_str(), std::ios::binary);
 	std::string   line;
 	
 	if (!ifs.is_open())
@@ -26,31 +26,26 @@ void MimeParser::parseMimeFile(const std::string &mimeFile)
 		if (line.find_first_not_of(' ') == line.npos || line.at(0) == '\n')
 			continue;
 		
-		// Content-type is everything between start and first space
-		std::string contentType = line.substr(0, line.find_first_of(' '));
-		// Extension is everything between last space and end or ';'
+		std::string description = line.substr(0, line.find_last_of(' '));
+		description = description.substr(0, description.find_last_not_of(' ') + 1); // Trim ending spaces (but not last character so +1)
+
 		if (line.find_first_of(';') == line.npos)
 			throw InvalidFileException();
 
-		// From first space to ending ';' both excluded, then split on space for all extensions with same type
-		std::string extensionsStr = line.substr(line.find_first_of(' ') + 1);
-		extensionsStr.pop_back(); // Remove ';' at the end
-		std::vector<std::string> extensionsVec = Utils::split(extensionsStr, ' ');
+		std::string httpCode = line.substr(line.find_last_of(' ') + 1);
+		httpCode.pop_back(); // Remove ';' at the end
 
-		for (std::vector<std::string>::const_iterator it = extensionsVec.begin(); it != extensionsVec.end(); ++it)
-		{
-			std::string extension = *it;
-			std::cout << "Extension '" << extension << "' has content-type '" << contentType << "'" << std::endl;
-			this->mimeMap[extension] = contentType;
-		}
+		std::cout << "Http code '" << httpCode << "' description is '" << description << "'" << std::endl;
+		this->httpCodesMap[httpCode] = description;
+
 	}
-	std::cout << "Found " << this->mimeMap.size() << " extensions\n";
+	std::cout << "Found " << this->httpCodesMap.size() << " http codes\n";
 	ifs.close();
 }
 
-MimeParser::MimeParser(const std::string &mimeFile)
+HttpCodesParser::HttpCodesParser(const std::string &httpCodesFile)
 {
-	this->parseMimeFile(mimeFile);
+	this->parseHttpCodesFile(httpCodesFile);
 }
 
 

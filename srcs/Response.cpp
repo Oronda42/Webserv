@@ -1,6 +1,6 @@
 #include "../include/Response.hpp"
 	
-Response::Response(const Request &request) : _contentType(""), _contentLength(0), _request(request)
+Response::Response(const Request &request) : _contentType(""), _contentLength(0), _request(request), _code(200)
 {
 	
 }

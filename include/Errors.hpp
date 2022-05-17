@@ -5,42 +5,30 @@
 /*        )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )         .    */
 /*   By: '/   /   (`.'  /      `-'-.-/   /.- (.''--'`-`-'  `--':        /     */
 /*                  -'            (   \  / .-._.).--..-._..  .-.  .-../ .-.   */
-/*   Created: 16-05-2022  by       `-' \/ (   )/    (   )  )/   )(   / (  |   */
-/*   Updated: 17-05-2022 15:08 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*   Created: 17-05-2022  by       `-' \/ (   )/    (   )  )/   )(   / (  |   */
+/*   Updated: 17-05-2022 15:26 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                 `._;  `._;                   `-            */
 /* ************************************************************************** */
 
-#ifndef MIMEPARSER_HPP
-# define MIMEPARSER_HPP
+#ifndef ERRORS_HPP
+# define ERRORS_HPP
 
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <exception>
-#include <string>
-
-#include "./Utils.hpp"
-#include "./Errors.hpp"
-
-#define MIME_MAP_FILE "mimes.txt"
-
-class MimeParser
+class FileNotFoundException : public std::exception
 {
 	public:
-		// Associates extension with content-type
-		typedef std::map<std::string, std::string> mimeMap_t;
-		mimeMap_t   mimeMap;
-
-	private:
-		std::string _mimeFile;
-
-		MimeParser();
-		void parseMimeFile(const std::string &mimeFile);
-
-	public:
-		MimeParser(const std::string& mimeFile);
+		char const *what() const throw()
+		{
+			return "File not found";
+		}
 };
 
-extern MimeParser mimeParser;
+class InvalidFileException : public std::exception
+{
+	public:
+		char const *what() const throw()
+		{
+			return "Invalid file";
+		}
+};
 
 #endif

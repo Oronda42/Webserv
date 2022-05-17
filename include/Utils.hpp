@@ -6,6 +6,8 @@
 #include <sstream>
 #include <vector>
 
+#include "./Errors.hpp"
+
 #define ROOT "/index.html"
 
 class Utils
@@ -47,8 +49,8 @@ class Utils
 			std::stringstream ss;
 
 			if(!ifs.is_open())
-				throw std::runtime_error("File stream is null, file not found, crashing lolilol");
-			
+				throw FileNotFoundException();
+							
 			ss << ifs.rdbuf();		
 			ifs.close();
 			return ss.str();

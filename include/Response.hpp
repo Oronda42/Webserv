@@ -12,6 +12,7 @@ class Response
 		std::string _contentType;
 		int         _contentLength;
 		Request     _request;
+		int         _code;
 
 
 	public:

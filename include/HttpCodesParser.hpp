@@ -6,12 +6,12 @@
 /*   By: '/   /   (`.'  /      `-'-.-/   /.- (.''--'`-`-'  `--':        /     */
 /*                  -'            (   \  / .-._.).--..-._..  .-.  .-../ .-.   */
 /*   Created: 16-05-2022  by       `-' \/ (   )/    (   )  )/   )(   / (  |   */
-/*   Updated: 17-05-2022 15:08 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*   Updated: 17-05-2022 15:20 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                 `._;  `._;                   `-            */
 /* ************************************************************************** */
 
-#ifndef MIMEPARSER_HPP
-# define MIMEPARSER_HPP
+#ifndef HTTPCODESPARSER_HPP
+# define HTTPCODESPARSER_HPP
 
 #include <iostream>
 #include <fstream>
@@ -22,25 +22,25 @@
 #include "./Utils.hpp"
 #include "./Errors.hpp"
 
-#define MIME_MAP_FILE "mimes.txt"
+#define HTTP_CODES_FILE "http_codes.txt"
 
-class MimeParser
+class HttpCodesParser
 {
 	public:
-		// Associates extension with content-type
-		typedef std::map<std::string, std::string> mimeMap_t;
-		mimeMap_t   mimeMap;
+		// Associates code with description
+		typedef std::map<std::string, std::string> httpCodesMap_t;
+		httpCodesMap_t   httpCodesMap;
 
 	private:
-		std::string _mimeFile;
+		std::string _httpCodesFile;
 
-		MimeParser();
-		void parseMimeFile(const std::string &mimeFile);
+		HttpCodesParser();
+		void parseHttpCodesFile(const std::string &httpCodesFile);
 
 	public:
-		MimeParser(const std::string& mimeFile);
+		HttpCodesParser(const std::string& httpCodesFile);
 };
 
-extern MimeParser mimeParser;
+extern HttpCodesParser httpCodesParser;
 
 #endif

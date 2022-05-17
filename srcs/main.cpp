@@ -10,7 +10,8 @@
 #include <cstdio>
 #include "../include/Request.hpp"
 #include "../include/Response.hpp"
-
+#include "../include/MimeParser.hpp"
+#include "../include/HttpCodesParser.hpp"
 
 #define PORT 8080
 #define NB_OF_CLIENTS 10
@@ -20,13 +21,13 @@
 #define DOCUMENT 0
 #define IMAGE 1
 
+// Only need 1 mimeParser and 1 httpCodesParser
 MimeParser mimeParser(MIME_MAP_FILE);
+HttpCodesParser httpCodesParser(HTTP_CODES_FILE);
 
 int main(int argc, char const *argv[])
 {
-
-	// Only need 1 mimeParser
-	mimeParser = MimeParser(MIME_MAP_FILE);
+	//mimeParser = MimeParser(MIME_MAP_FILE);
 	
   // Create a socket (IPv4, TCP)
   int sockfd = socket(AF_INET, SOCK_STREAM,0);
