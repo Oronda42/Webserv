@@ -32,6 +32,7 @@ Request-URI Too Large            414;
 Unsupported Media Type           415;
 Requested range not satisfiable  416;
 Expectation Failed               417;
+I'm a teapot					 418;
 Internal Server Error            500;
 Not Implemented                  501;
 Bad Gateway                      502;

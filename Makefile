@@ -1,20 +1,43 @@
-SRC = srcs/main.cpp srcs/MimeParser.cpp srcs/Request.cpp srcs/Response.cpp srcs/ConfigParser.cpp srcs/HttpCodesParser.cpp
+CXX       = g++
+CXX_FLAGS = -std=c++98 -ggdb
 
-CC = clang++
-CFLAGS =  -std=c++98 -Iinclude/#-fsanitize=address #-Wall -Werror -Wextra
-NAME = belloServ
-OBJS = ${SRC:.cpp=.o}
-INCLUDE = /includes
+BIN     = bin
+SRC     = src
+INCLUDE = include
 
-${NAME} : ${OBJS}
-	${CC} ${CFLAGS} ${OBJS} -o ${NAME}
+EXECUTABLE  = belloServ
 
-%.o:%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
-clean :
-	rm -rf ${OBJS}
 
-fclean : clean
-	rm ${NAME}
+all: $(BIN)/$(EXECUTABLE)
 
-re : fclean ${NAME}
+run: clean all
+	clear
+	./$(BIN)/$(EXECUTABLE)
+
+$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
+	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
+
+clean:
+	-rm $(BIN)/*
+
+# SRC = srcs/main.cpp srcs/MimeParser.cpp srcs/Request.cpp srcs/Response.cpp srcs/ConfigParser.cpp srcs/HttpCodesParser.cpp
+
+# CC = g++
+# CFLAGS =  -std=c++98 -Iinclude/#-fsanitize=address #-Wall -Werror -Wextra
+# NAME = belloServ
+# OBJS = ${SRC:.cpp=.o}
+# INCLUDE = include
+
+# ${NAME} : ${OBJS}
+# 	${CC} ${CFLAGS} ${OBJS} -o ${NAME}
+
+# %.o:%.cpp
+# 	$(CC) $(CFLAGS) -c $< -o $@
+# clean :
+# 	rm -rf ${OBJS}
+
+# fclean : clean
+# 	rm ${NAME}
+
+# re : fclean ${NAME}
+
