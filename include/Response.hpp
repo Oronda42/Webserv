@@ -1,18 +1,23 @@
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 
-#include <iostream> 
+#include <iostream>
+#include <sstream>
+#include "./Request.hpp"
+#include "./Utils.hpp"
 
-struct Response
+class Response
 {
-	int type;
-	std::string content_type;
-	int content_lenght;
-	std::string (*get_content)(std::string, Response&);
+	private:
+		std::string _contentType;
+		int         _contentLength;
+		Request     _request;
 
-	Response(int type);
-	std::string create_response(std::string& r);
-	
+
+	public:
+		Response(const Request &request);
+		std::string generateResponse();
+
 };
 
 #endif

@@ -13,7 +13,7 @@ text/vnd.wap.wml                      wml;
 text/x-component                      htc;
 image/png                             png;
 image/tiff                            tif tiff;
-image/vnd.wap.wbmp                    wbmp
+image/vnd.wap.wbmp                    wbmp;
 image/x-icon                          ico;
 image/x-jng                           jng;
 image/x-ms-bmp                        bmp;

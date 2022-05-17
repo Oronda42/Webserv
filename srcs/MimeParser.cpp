@@ -6,7 +6,7 @@
 /*   By: oronda <oronda@student.42nice.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 2022/05/16 19:02:20 by oronda           ###   ########.fr       */
+/*   Updated: 17-05-2022 13:41 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void MimeParser::parseMimeFile(const std::string &mimeFile)
 
 		std::string extension = line.substr(line.find_last_of(' ') + 1, line.find_first_of(';') - 1);
 		std::cout << "Extension '" << extension << "' has content-type '" << contentType << "'" << std::endl;
-		this->_mimeMap[extension] = contentType;
+		this->mimeMap[extension] = contentType;
 	}
 	ifs.close();
 }
@@ -45,15 +45,15 @@ MimeParser::MimeParser(const std::string &mimeFile)
 }
 
 
-int main()
-{
-	try
-	{
-		MimeParser pouet("mime.txt");
+// int main()
+// {
+// 	try
+// 	{
+// 		MimeParser pouet("mime.txt");
 
-	}
-	catch (std::exception &e)
-	{
-		std::cerr << "Exception caught: " << e.what() << std::endl;
-	}
-}
+// 	}
+// 	catch (std::exception &e)
+// 	{
+// 		std::cerr << "Exception caught: " << e.what() << std::endl;
+// 	}
+// }

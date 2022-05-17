@@ -2,17 +2,20 @@
 # define REQUEST_HPP
 
 #include <iostream>
+#include "./Utils.hpp"
+#include "./MimeParser.hpp"
 
-struct Request
+class Request
 {
-	int type;
-	std::string request;
-	std::string filePath;
-	Request(int type, std::string request) : request(request), filePath(Utils::get_file_path(request))
-	{
+	private:
+		std::string _rawRequest;
+		std::string _filePath;
+		std::string _contentType;
+	
+	public:
+		Request(const std::string &rawRequest);
 
-	}
-	Request parse_request(std::string &request);
+		std::string getFilePath() const;
 };
 
 #endif

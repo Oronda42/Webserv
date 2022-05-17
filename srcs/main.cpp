@@ -92,11 +92,11 @@ int main(int argc, char const *argv[])
 			continue;
 		}
 		
-		Request r(buffer);
-		Response response(r);
+		Request req(buffer);
+		Response response(req);
 		//std::string response = create_response(request);
 								
-		send(connection,response.c_str(),response.size(),0);
+		send(connection,response.generateResponse().c_str(),response.generateResponse().size(),0);
 		close(connection);
 
 	}

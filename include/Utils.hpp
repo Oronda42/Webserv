@@ -4,19 +4,18 @@
 
 #include <fstream>
 #include <sstream>
+#include <vector>
 
-
+#define ROOT "/index.html"
 
 class Utils
 {
 	public:
-		std::string get_file_path(std::string &request);
-		std::string get_image(std::string file_path, Response &response);
-		std::string get_document(std::string file_path, Response &response);
+		std::string getFilePath(std::string &request);
+		std::string getRawDocument(std::string file_path);
 
-
-		static std::string get_first_line(std::string &str)
-		{	
+		static std::string get_first_line(const std::string &str)
+		{
 			return str.substr(0, str.find('\r'));
 		}
 
@@ -40,63 +39,24 @@ class Utils
 			return output;
 		}
 
-		static std::string get_document(std::string file_path, Response &response)
+		static std::string getRawDocumentContent(std::string file_path)
 		{
-			
-			file_path.erase(0,1);
-			std::ifstream ifs(file_path.c_str());
-
-			std::cout << "document path : "<<  file_path << std::endl << std::endl;
-			if (!ifs.is_open() ) 
-			{
-				std::cerr << "could not open input file" << std::endl;
-				return std::string();
-			}
-
-			std::vector<std::string> lines;
-			std::string line;
-			while(std::getline(ifs, line)) 
-			{
-				response.content_lenght += line.size();
-				lines.push_back(line);
-			}
-				
-			
+			std::cout << "Getting file : " << file_path << std::endl;
+			//file_path.erase(0,1);
+			std::ifstream     ifs(file_path.c_str(), std::ios::binary);
+			std::string       line;
+			std::string       fileContent;
 			std::stringstream ss;
-			for (int i = 0; i < lines.size(); i++ ) 
-				ss << lines[i]; 
-			std::string result = ss.str();
-			return result;
-		}
 
-		static std::string get_image(std::string file_path, Response &response)
-		{
-			file_path.erase(0,1);
-			std::ifstream ifs(file_path.c_str(), std::ios::binary);
+			if(!ifs.is_open())
+				throw std::runtime_error("File stream is null, pouet pouet");
 			
-
-			FILE* file_stream = fopen(file_path.c_str(), "rb");
-			std::string file_str;
-			size_t file_size;
-
-			if(!file_stream)
-				printf("file_stream is null! file name -> %s\n", file_path.c_str());
-			
-			fseek(file_stream, 0, SEEK_END);
-			response.content_lenght = ftell(file_stream);
-			rewind(file_stream);
-
-			char buffer[response.content_lenght];
-			file_size = fread(buffer, 1, response.content_lenght, file_stream);
-			std::stringstream ss;
-			for(int i = 0; i < file_size; i++)
-				ss << buffer[i];
-
+			ss << ifs.rdbuf();		
+			ifs.close();
 			return ss.str();
-
 		}
 
-		static std::string get_file_path(std::string &request)
+		static std::string getFilePath(const std::string &request)
 		{
 			std::string first_line = get_first_line(request);
 			std::vector<std::string> splited_fl = split(first_line, ' ');
@@ -106,6 +66,14 @@ class Utils
 			std::string file_path = splited_fl[1];
 			return file_path;
 		}
-}
+
+		static std::string getFileExtension(const std::string &filePath)
+		{
+			// Prevent file ending in '.'
+			if (filePath.find_last_of('.') != filePath.npos && filePath.find_last_of('.') + 1 < filePath.length())
+				return filePath.substr(filePath.find_last_of('.') + 1); // from . to the end
+			return "";
+		}
+};
 
 #endif

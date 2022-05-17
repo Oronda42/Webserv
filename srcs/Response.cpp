@@ -1,42 +1,26 @@
 #include "../include/Response.hpp"
-#include "../include/Request.hpp"
-
-#include <sstream>
-
 	
-Response::Response(int type) : type(type), content_lenght(0)
+Response::Response(const Request &request) : _contentType(""), _contentLength(0), _request(request)
 {
-	if (type == DOCUMENT)
-	{
-		content_type = "text/html";
-		get_content = &get_image;
-	}
-		
-	if (type == IMAGE)
-	{
-		content_type = "image";
-		get_content = &get_image;
-	}	
+	
 }
 
-std::string Response::create_response(std::string& r)
+std::string Response::generateResponse()
 {
-	Request request = parse_request(r);
-
 	std::string firstHeader = "HTTP/1.1 200 OK"; //TODO
 
-	Response response(request.type);
-	std::string content = response.get_content(request.filePath, response);
+	std::string content = Utils::getRawDocumentContent(this->_request.getFilePath());
 	std::stringstream ss;
 
+	MimeParser mimeParser(MIME_MAP_FILE);
+
 	ss << firstHeader << std::endl; //TODO
-	ss << "Content-Type: " << response.content_type << std::endl;
-	ss << "Content-Length: " << response.content_lenght << std::endl;
+	ss << "Content-Type: " << mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())] << std::endl;
+	ss << "Content-Length: " << content.length() << std::endl;
 	ss << std::endl;
 	// END OF HEADER
 
 	ss << content;
 
-	std::string response_str;
-	return response_str = ss.str();
+	return ss.str();
 }
