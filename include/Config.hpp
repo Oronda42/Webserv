@@ -2,8 +2,10 @@
 #define CONFIG_HPP
 
 #include <iostream>
+#include <fstream>
+#include <vector>
 
-
+#include "./Server.hpp"
 
 class Config 
 {
@@ -13,7 +15,7 @@ class Config
 		
 	public:
 		Config();
-		
+		bool parse(const std::string &configFile);
 };
 
 
