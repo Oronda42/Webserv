@@ -27,6 +27,11 @@ std::string Request::getProtocol() const
 	return this->_protocol;
 }
 
+void Request::setFilePath(std::string str)
+{
+	this->_filePath = str;
+}
+
 void Request::removeFirstSlash(std::string& str)
 {
 	if (str.length() >= 1 && str.at(0) == '/')

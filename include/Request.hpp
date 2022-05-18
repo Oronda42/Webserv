@@ -5,6 +5,7 @@
 #include "./Utils.hpp"
 #include "./MimeParser.hpp"
 
+
 class Request
 {
 	private:
@@ -24,7 +25,8 @@ class Request
 		Request(const std::string &rawRequest);
 		std::string getFilePath() const;
 		std::string getMethod() const;
-		std::string getProtocol() const; 
+		std::string getProtocol() const;
+		void setFilePath(std::string str);
 		 
 };
 
