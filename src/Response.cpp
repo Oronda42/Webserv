@@ -9,33 +9,21 @@ std::string Response::generateResponse()
 {
 	std::cout << "++++++++++++++++++++++++++++  SERVER LOGS ++++++++++++++++++++++++++++" << std::endl;
 
-	//if(_code % 4)
-		
-	//std::string firstHeader = "HTTP/1.1 200 OK"; //TODO
-
 	_header = generate2xxHeader("HTTP/1.1 ", "200 ","OK");
 	_contentType = mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())];
 	_content = Utils::getRawDocumentContent(this->_request.getFilePath());
 	
 	
-	//std::stringstream ss;
-
-	//  std::string extension = Utils::getFileExtension(this->_request.getFilePath());
-	//  std::cout << "extension is " << extension << std::endl;
-	//  std::cout << "associated type is " << mimeParser.mimeMap.size() << ", "<< mimeParser.mimeMap.at(extension) << std::endl;
+	 std::string extension = Utils::getFileExtension(this->_request.getFilePath());
+	 std::cout << "extension is " << extension << std::endl;
+	 std::cout << "associated type is " << mimeParser.mimeMap.size() << ", "<< mimeParser.mimeMap.at(extension) << std::endl;
 
 	std::string response = generate2xxResponse(_header, _contentType, _content);
-	// ss << _header << std::endl; //TODO
-	// ss << "Content-Type: " << mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())] << std::endl;
-	// ss << "Content-Length: " << content.length() << std::endl;
-	// ss << std::endl;
-	// END OF HEADER
 	
-	//ss << content;
 
 	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 
-	//return ss.str();
+	
 	return response;
 }
 

@@ -2,10 +2,14 @@
 
 
 Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
-{
-	_filePath = parseFilePath(_rawRequest);
-	if (this->_filePath.length() >= 1 && this->_filePath.at(0) == '/')
-		this->_filePath.erase(0, 1); // remove starting '/'
+{	
+	std::string first_line = Utils::get_first_line(_rawRequest);
+	std::vector<std::string> splited_fl = Utils::split(first_line, ' ');
+
+	_method = parseMethod(splited_fl);
+	_filePath = parseFilePath(splited_fl);
+	_protocol = parseProtocol(splited_fl);
+	
 }
 
 std::string Request::getFilePath() const 
@@ -13,26 +17,39 @@ std::string Request::getFilePath() const
 	return this->_filePath;
 }
 
-std::string Request::parseFilePath(const std::string &_rawRequest) const 
+std::string Request::getMethod() const 
 {
-	std::string first_line = Utils::get_first_line(_rawRequest);
-	std::vector<std::string> splited_fl = Utils::split(first_line, ' ');
-
-	if (!splited_fl[1].compare("/"))
-		return (ROOT);
-	std::string file_path = splited_fl[1];
-	return file_path;
+	return this->_method;
 }
 
-// Request Request::parse_request(std::string &request)
-// {
-// 	std::vector<std::string> splited_request = Utils::split(request,'\n');
-// 	for (size_t i = 0; i < splited_request.size(); i++)
-// 	{
-// 		if (splited_request[i].find("Sec-Fetch-Dest: image") != std::string::npos)
-// 			return Request(IMAGE, request);
-// 		if (splited_request[i].find("Sec-Fetch-Dest: document") != std::string::npos)
-// 			return Request(DOCUMENT,request);
-// 	}
-// 	return Request(DOCUMENT,request);
-// }
+std::string Request::getProtocol() const 
+{
+	return this->_protocol;
+}
+
+void Request::removeFirstSlash(std::string& str)
+{
+	if (str.length() >= 1 && str.at(0) == '/')
+		str.erase(0, 1);
+}
+
+std::string Request::parseMethod(const std::vector<std::string> &splited_line) const
+{
+	return splited_line[0];
+}
+
+std::string Request::parseFilePath(std::vector<std::string> &splited_line) 
+{
+	if (!splited_line[1].compare("/"))
+		return (ROOT);
+	else
+	{
+		removeFirstSlash(splited_line[1]);
+		return splited_line[1];
+	}
+}
+
+std::string Request::parseProtocol(const std::vector<std::string> &splited_line) const
+{
+	return splited_line[2];
+}

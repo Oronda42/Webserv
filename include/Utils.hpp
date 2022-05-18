@@ -8,7 +8,7 @@
 
 #include "./Errors.hpp"
 
-#define ROOT "/index.html"
+#define ROOT "index.html"
 
 class Utils
 {

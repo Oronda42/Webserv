@@ -16,7 +16,7 @@
 #define PORT 8080
 #define NB_OF_CLIENTS 10
 
-#define ROOT "/index.html"
+#define ROOT "index.html"
 
 #define DOCUMENT 0
 #define IMAGE 1
