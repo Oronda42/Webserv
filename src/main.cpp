@@ -12,6 +12,7 @@
 #include "../include/Response.hpp"
 #include "../include/MimeParser.hpp"
 #include "../include/HttpCodesParser.hpp"
+#include "../include/ConfigParser.hpp"
 
 #define PORT 8080
 #define NB_OF_CLIENTS 10
@@ -27,6 +28,9 @@ HttpCodesParser httpCodesParser(HTTP_CODES_FILE);
 
 int main(int argc, char const *argv[])
 {
+	ConfigParser pouet("webserv.conf");
+	pouet.parseConfig();
+
 	//mimeParser = MimeParser(MIME_MAP_FILE);
 	
   // Create a socket (IPv4, TCP)

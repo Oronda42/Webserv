@@ -21,7 +21,7 @@ class Utils
 			return str.substr(0, str.find('\r'));
 		}
 
-		static std::vector<std::string> split(const std::string& s, char separator)
+		static std::vector<std::string> split(const std::string& s, const std::string &separator)
 		{
 			std::vector<std::string> output;
 			std::string::size_type end = 0, start = 0;
@@ -37,6 +37,11 @@ class Utils
 			}
 
 			return output;
+		}
+
+		static std::vector<std::string> split(const std::string& s, char separator)
+		{
+			return Utils::split(s, std::string(1, separator));
 		}
 
 		static std::string getRawDocumentContent(std::string file_path)
