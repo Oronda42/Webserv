@@ -18,9 +18,7 @@ std::string Response::generateResponse()
 	}
 	
 	_header = createHeader(_request.getProtocol(), _code, _status);
-
 	_contentType = mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())];
-
 	_content = Utils::getRawDocumentContent(this->_request.getFilePath());
 	
 	
@@ -29,11 +27,8 @@ std::string Response::generateResponse()
 	std::cout << "associated type is " << mimeParser.mimeMap.size() << ", "<< mimeParser.mimeMap.at(extension) << std::endl;
 
 	std::string response = constructResponse(_header, _contentType, _content);
-	return response;
-	
-	
-
 	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+	return response;
 
 }
 
