@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
 class Server 
 {
@@ -30,9 +31,11 @@ class Server
 
 	public:
 		std::vector<Route> routes;
-		Server() { //todo
-
-		}
+		std::vector<std::string> names;
+		unsigned short port;
+		unsigned int maxBodySize;
+		std::map<int, std::string> errorPages;
+		Server();
 };
 
 #endif

@@ -71,6 +71,7 @@
 		"mutex": "cpp",
 		"ratio": "cpp",
 		"stack": "cpp",
-		"filesystem": "cpp"
+		"filesystem": "cpp",
+		"__memory": "cpp"
 	}
 }

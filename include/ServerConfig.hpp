@@ -26,8 +26,6 @@ class ServerConfig
 // 					listen [::]:80 default_server;				>>	ipv6_port + isDefaultServer		
 // 					server_name example.com www.example.com;	>>	virtual_host_names
 // 					root /var/www/example.com;					>>	root_directory
-// 					index index.html;							>>	root_web_page
-// 					try_files $uri /index.html;
 // 			}
 
 

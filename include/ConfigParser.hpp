@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <stack>
 
 #include "Config.hpp"
 #include "Server.hpp"
@@ -28,6 +29,7 @@ class ConfigParser
 		Server::CGI parseCgiLine(const std::string &line);
 		// bool CheckBrackets(std::string configFile);
 		bool CheckDirective(std::string line);
+		bool validateConfigFile();
 		// bool CheckBlocks(std::string configFile, std::vector<std::string> directives);
 		// bool CheckContexts(std::string configFile, std::vector<std::string> directives);
 
