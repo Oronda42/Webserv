@@ -1,24 +1,24 @@
-CXX       = clang++
-CXX_FLAGS = -std=c++98
+CXX       = g++
+CXX_FLAGS = -g -std=c++98 
 
-BIN     = bin
+
 SRC     = src
 INCLUDE = include
 
 EXECUTABLE  = belloServ
 
 
-all: $(BIN)/$(EXECUTABLE)
+all: $(EXECUTABLE)
 
 run: clean all
 	clear
-	./$(BIN)/$(EXECUTABLE)
+	./$(EXECUTABLE)
 
-$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
+$(EXECUTABLE): $(SRC)/*.cpp
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
 
 clean:
-	-rm $(BIN)/*
+	-rm $(EXECUTABLE)
 
 # SRC = srcs/main.cpp srcs/MimeParser.cpp srcs/Request.cpp srcs/Response.cpp srcs/ConfigParser.cpp srcs/HttpCodesParser.cpp
 

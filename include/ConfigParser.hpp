@@ -25,7 +25,7 @@ class ConfigParser
 		
 		ConfigParser();
 		Server parseOneServer(std::ifstream &ifs);
-		Server::Route parseOneRoute(std::ifstream &ifs, const std::string &path);
+		Server::Location parseOneRoute(std::ifstream &ifs, const std::string &path);
 		Server::CGI parseCgiLine(const std::string &line);
 		// bool CheckBrackets(std::string configFile);
 		bool CheckDirective(std::string line);

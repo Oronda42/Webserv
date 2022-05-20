@@ -49,7 +49,7 @@ std::string Request::parseFilePath(std::vector<std::string> &splited_line)
 		return (ROOT);
 	else
 	{
-		removeFirstSlash(splited_line[1]);
+		//removeFirstSlash(splited_line[1]);
 		return splited_line[1];
 	}
 }

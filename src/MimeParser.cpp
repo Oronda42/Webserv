@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MimeParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oronda <oronda@student.42nice.fr>          +#+  +:+       +#+        */
+/*   By: oronda <oronda@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 2022/05/17 19:57:11 by oronda           ###   ########.fr       */
+/*   Updated: 2022/05/20 14:47:06 by oronda           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ void MimeParser::parseMimeFile(const std::string &mimeFile)
 {
 	std::ifstream ifs(mimeFile.c_str(), std::ios::binary);
 	std::string   line;
+
 	
 	if (!ifs.is_open())
 		throw FileNotFoundException();

@@ -15,7 +15,7 @@ class Server
 		};
 
 		// Custom routes from config, like location from nginx
-		struct Route
+		struct Location
 		{
 			std::string path; // Path (same as location /pouet from nginx, here /pouet is path)
 			std::vector<std::string> acceptedHttpMethods; // List of accepted http methods (GET, POST etc.)
@@ -30,7 +30,7 @@ class Server
 
 
 	public:
-		std::vector<Route> routes;
+		std::vector<Location> routes;
 		std::vector<std::string> names;
 		unsigned short port;
 		unsigned int maxBodySize;

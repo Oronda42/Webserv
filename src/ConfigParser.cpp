@@ -20,36 +20,36 @@ ConfigParser::~ConfigParser()
 	//std::cout << "destructor" << std::endl;
 }
 
-bool ConfigParser::validateConfigFile()
-{
-	std::ifstream ifs(this->_configFile.c_str());
-	std::stack<char> bracketStack;
+// bool ConfigParser::validateConfigFile()
+// {
+// 	std::ifstream ifs(this->_configFile.c_str());
+// 	std::stack<char> bracketStack;
 
-	if (!ifs.is_open())
-		throw FileNotFoundException();
+// 	if (!ifs.is_open())
+// 		throw FileNotFoundException();
 
-	std::string line;
-	while (std::getline(ifs, line))
-	{
-		std::vector<std::string> values = Utils::split(line, " \t");
+// 	std::string line;
+// 	while (std::getline(ifs, line))
+// 	{
+// 		std::vector<std::string> values = Utils::split(line, " \t");
 
-		if (values.empty())
-			continue;
+// 		if (values.empty())
+// 			continue;
 
-		for (std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it)
-		{
-			if (*it == "{")
-				bracketStack.push('{');
-			else if (*it == "}")
-				bracketStack.push('}');
-		}
+// 		for (std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it)
+// 		{
+// 			if (*it == "{")
+// 				bracketStack.push('{');
+// 			else if (*it == "}")
+// 				bracketStack.push('}');
+// 		}
 
-		std::string configValue = values.at(0);
-	}
+// 		std::string configValue = values.at(0);
+// 	}
 
-	if (!bracketStack.empty())
-		throw pouet;
-}
+// 	if (!bracketStack.empty())
+// 		throw pouet;
+// }
 
 Server::CGI ConfigParser::parseCgiLine(const std::string &line)
 {
@@ -74,10 +74,10 @@ Server::CGI ConfigParser::parseCgiLine(const std::string &line)
 	return cgi;
 }
 
-Server::Route ConfigParser::parseOneRoute(std::ifstream &ifs, const std::string &path)
+Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::string &path)
 {
 	std::string line;
-	Server::Route route;
+	Server::Location route;
 	
 	route.path = path;
 
@@ -311,9 +311,9 @@ std::vector<Server> ConfigParser::parseConfig()
 		for (std::map<int, std::string>::iterator it1 = server.errorPages.begin(); it1 != server.errorPages.end(); ++it1)
 			std::cout << "Error " << it1->first << " page: " << it1->second << std::endl;
 	
-		for (std::vector<Server::Route>::iterator it1 = server.routes.begin(); it1 != server.routes.end(); ++it1)
+		for (std::vector<Server::Location>::iterator it1 = server.routes.begin(); it1 != server.routes.end(); ++it1)
 		{
-			Server::Route route = *it1;
+			Server::Location route = *it1;
 
 			std::cout << "--- Route " << route.path << " ---\n";
 			std::cout << "Accepted methods: [";

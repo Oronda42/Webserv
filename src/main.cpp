@@ -17,21 +17,23 @@
 #define PORT 8080
 #define NB_OF_CLIENTS 10
 
-#define ROOT "index.html"
+#define ROOT "/index.html"
 
 #define DOCUMENT 0
 #define IMAGE 1
 
 // Only need 1 mimeParser and 1 httpCodesParser
-MimeParser mimeParser(MIME_MAP_FILE);
+ MimeParser mimeParser(MIME_MAP_FILE);
 HttpCodesParser httpCodesParser(HTTP_CODES_FILE);
 
 int main(int argc, char const *argv[])
-{
-	ConfigParser pouet("webserv.conf");
-	pouet.parseConfig();
+{	
+	
 
-	//mimeParser = MimeParser(MIME_MAP_FILE);
+	ConfigParser config("conf/webserv.conf");
+	std::vector<Server> servers =  config.parseConfig();
+
+	
 	
   // Create a socket (IPv4, TCP)
   int sockfd = socket(AF_INET, SOCK_STREAM,0);
@@ -105,7 +107,7 @@ int main(int argc, char const *argv[])
 		}
 		
 		Request req(buffer);
-		Response response(req);
+		Response response(req, servers[0]);
 		//std::string response = create_response(request);
 								
 		std::string responseStr = response.generateResponse();
