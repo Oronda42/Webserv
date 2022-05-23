@@ -32,12 +32,6 @@ void Request::setFilePath(std::string str)
 	this->_filePath = str;
 }
 
-void Request::removeFirstSlash(std::string& str)
-{
-	if (str.length() >= 1 && str.at(0) == '/')
-		str.erase(0, 1);
-}
-
 std::string Request::parseMethod(const std::vector<std::string> &splited_line) const
 {
 	return splited_line[0];

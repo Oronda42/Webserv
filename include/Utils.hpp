@@ -82,15 +82,6 @@ class Utils
 			return "";
 		}
 
-		struct compareByLength
-		{
-			typedef std::pair<std::string, std::string> pair;
-			bool operator()(const pair &l, const pair &r) const
-			{
-				return l.first.size() < r.first.size();
-			}
-		};
-
 		// bool isDirectory(struct stat &stats)
 		// {
 		// 	return (S_ISDIR(stats.st_mode));
@@ -115,6 +106,12 @@ class Utils
 
 		// 	return false;
 		// }
+
+		static void removeFirstSlash(std::string& str)
+		{
+			if (str.length() >= 1 && str.at(0) == '/')
+				str.erase(0, 1);
+		}
 };
 
 #endif

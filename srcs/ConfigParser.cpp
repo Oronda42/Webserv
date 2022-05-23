@@ -51,9 +51,9 @@ ConfigParser::~ConfigParser()
 // 		throw pouet;
 // }
 
-Server::CGI ConfigParser::parseCgiLine(const std::string &line)
+CGI ConfigParser::parseCgiLine(const std::string &line)
 {
-	Server::CGI cgi;
+	CGI cgi;
 	cgi.execPath = "";
 	cgi.extension = "";
 
@@ -323,9 +323,9 @@ std::vector<Server> ConfigParser::parseConfig()
 			std::cout << "Directory listing " << (route.directoryListing ? "enabled" : "disabled") << "\n";
 			std::cout << "Default file: " << route.defaultFile << "\n";
 			std::cout << "CGIS: ";
-			for (std::vector<Server::CGI>::iterator it2 = route.cgis.begin(); it2 != route.cgis.end(); ++it2)
+			for (std::vector<CGI>::iterator it2 = route.cgis.begin(); it2 != route.cgis.end(); ++it2)
 			{
-				Server::CGI cgi = *it2;
+				CGI cgi = *it2;
 				std::cout << "[" << cgi.extension << " : " << cgi.execPath << "] ";
 			}
 			std::cout << "\nRedirection: " << route.redirection;

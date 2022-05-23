@@ -11,6 +11,7 @@
 #include "Server.hpp"
 #include "Errors.hpp"
 #include "Utils.hpp"
+#include "cgi.hpp"
 
 class ConfigParser 
 {
@@ -26,7 +27,7 @@ class ConfigParser
 		ConfigParser();
 		Server parseOneServer(std::ifstream &ifs);
 		Server::Location parseOneRoute(std::ifstream &ifs, const std::string &path);
-		Server::CGI parseCgiLine(const std::string &line);
+		CGI parseCgiLine(const std::string &line);
 		// bool CheckBrackets(std::string configFile);
 		bool CheckDirective(std::string line);
 		bool validateConfigFile();

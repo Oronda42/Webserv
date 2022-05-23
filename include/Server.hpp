@@ -4,15 +4,12 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include "cgi.hpp" 
 
 class Server 
 {
 	public:
-		struct CGI
-		{
-			std::string extension;
-			std::string execPath;
-		};
+		
 
 		// Custom routes from config, like location from nginx
 		struct Location
