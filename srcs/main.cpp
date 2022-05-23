@@ -28,7 +28,8 @@ HttpCodesParser httpCodesParser(HTTP_CODES_FILE);
 
 int main(int argc, char const *argv[])
 {	
-	
+	(void) argc;
+	(void) argv;
 
 	ConfigParser config("conf/webserv.conf");
 	std::vector<Server> servers =  config.parseConfig();

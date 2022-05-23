@@ -20,7 +20,7 @@ std::string Response::generateResponse()
 			break;
 		}
 		else
-			_request.setFilePath("gang-bang/www/404.html");
+			_request.setFilePath("/404.html");
 		
 	}
 
