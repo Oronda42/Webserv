@@ -6,6 +6,9 @@
 #include <fstream>
 #include <string>
 #include <stack>
+#include <algorithm>
+#include <climits>
+#include <cstdlib>
 
 #include "Config.hpp"
 #include "Server.hpp"

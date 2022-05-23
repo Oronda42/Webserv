@@ -36,40 +36,40 @@ int main(int argc, char const *argv[])
 
 	
 	
-  // Create a socket (IPv4, TCP)
-  int sockfd = socket(AF_INET, SOCK_STREAM,0);
-  if (sockfd == -1) 
-  {
-    std::cout << "Failed to create socket. errno: " << errno << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  else
-	std::cout << "Opening socket : "<<  sockfd << std::endl;
+	// Create a socket (IPv4, TCP)
+	int sockfd = socket(AF_INET, SOCK_STREAM,0);
+	if (sockfd == -1) 
+	{
+		std::cout << "Failed to create socket. errno: " << errno << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	else
+		std::cout << "Opening socket : "<<  sockfd << std::endl;
 
 	const int trueFlag = 1;
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
 		 std::cout << "sockopt failed " << errno << std::endl;
 
-  // Listen to port 8080 on any address
-  sockaddr_in sockaddr;
-  sockaddr.sin_family = AF_INET;
-  sockaddr.sin_addr.s_addr = INADDR_ANY;
-  sockaddr.sin_port = htons(PORT); // htons is necessary to convert a number to
-                                   // network byte order
-  if (bind(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) 
-  {
-    std::cout << "Failed to bind to port " << PORT << ". errno: " << errno << std::endl;
-    exit(EXIT_FAILURE);
-  }
-   else
+	// Listen to port 8080 on any address
+	sockaddr_in sockaddr;
+	sockaddr.sin_family = AF_INET;
+	sockaddr.sin_addr.s_addr = INADDR_ANY;
+	sockaddr.sin_port = htons(PORT); // htons is necessary to convert a number to
+									// network byte order
+	if (bind(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) 
+	{
+		std::cout << "Failed to bind to port " << PORT << ". errno: " << errno << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	else
 	std::cout << "Binding socket : "<<  sockfd << std::endl;
 
-  if(listen(sockfd,NB_OF_CLIENTS) < 0)
-  {
-	std::cout << "Failed to listen on socket " << PORT << ". errno: " << errno << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  else
+	if(listen(sockfd,NB_OF_CLIENTS) < 0)
+	{
+		std::cout << "Failed to listen on socket " << PORT << ". errno: " << errno << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	else
 	std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;
 
 	while(1)
