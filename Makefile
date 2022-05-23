@@ -1,10 +1,11 @@
 SRCS = $(wildcard srcs/*.cpp)
+INCLUDES = include/
 
 OBJS = $(SRCS:.cpp=.o)
 
 NAME = belloServ
 
-CC = g++ -Wall -Wextra -Werror -std=c++98 -g
+CC = g++ -I$(INCLUDES) -Wall -Wextra -Werror -std=c++98 -g
 
 SHELL = zsh
 
