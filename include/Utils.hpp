@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <fcntl.h>
 
 #include "./Errors.hpp"
 
@@ -80,6 +81,40 @@ class Utils
 				return filePath.substr(filePath.find_last_of('.') + 1); // from . to the end
 			return "";
 		}
+
+		struct compareByLength
+		{
+			typedef std::pair<std::string, std::string> pair;
+			bool operator()(const pair &l, const pair &r) const
+			{
+				return l.first.size() < r.first.size();
+			}
+		};
+
+		// bool isDirectory(struct stat &stats)
+		// {
+		// 	return (S_ISDIR(stats.st_mode));
+		// }
+
+		// bool canReadFile(std::string& filePath)
+		// {
+		// 	FILE *fp = fopen("results.txt", "w");
+		// 	if (fp != NULL)
+		// 		return true;
+		// 	if (errno == EACCES)
+		// 		cerr << "Permission denied" << endl;
+		// 	return false;
+		// }
+
+		// bool canOpenFile(std::string& filePath)
+		// {
+		// 	FILE *fp = fopen("results.txt", "w");
+		// 	if (fp != NULL)
+		// 		return true;
+		// 	if (errno == EACCES)
+
+		// 	return false;
+		// }
 };
 
 #endif
