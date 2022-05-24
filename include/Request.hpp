@@ -12,7 +12,7 @@ class Request
 		std::string _rawRequest;
 
 		std::string _method;
-		std::string _filePath;
+		std::string _uri;
 		std::string _protocol;
 
 		std::string parseMethod(const std::vector<std::string> &splited_line) const;
@@ -21,10 +21,10 @@ class Request
 	
 	public:
 		Request(const std::string &rawRequest);
-		std::string getFilePath() const;
+		std::string getUri() const;
 		std::string getMethod() const;
 		std::string getProtocol() const;
-		void setFilePath(std::string str);
+		void setUri(std::string str);
 		 
 };
 

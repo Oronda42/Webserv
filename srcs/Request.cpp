@@ -7,14 +7,14 @@ Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
 	std::vector<std::string> splited_fl = Utils::split(first_line, ' ');
 
 	_method = parseMethod(splited_fl);
-	_filePath = parseFilePath(splited_fl);
+	_uri = parseFilePath(splited_fl);
 	_protocol = parseProtocol(splited_fl);
 	
 }
 
-std::string Request::getFilePath() const 
+std::string Request::getUri() const 
 {
-	return this->_filePath;
+	return this->_uri;
 }
 
 std::string Request::getMethod() const 
@@ -27,9 +27,9 @@ std::string Request::getProtocol() const
 	return this->_protocol;
 }
 
-void Request::setFilePath(std::string str)
+void Request::setUri(std::string str)
 {
-	this->_filePath = str;
+	this->_uri = str;
 }
 
 std::string Request::parseMethod(const std::vector<std::string> &splited_line) const

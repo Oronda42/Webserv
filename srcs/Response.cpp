@@ -49,7 +49,6 @@ std::string Response::replaceLocationRoot(const Server::Location &location, cons
 }
 
 
-
 std::string Response::createCgiResponse(const CGI &cgi, const std::string &rawFilePath)
 {
 	std::string rawCgiContent = cgi.executeCgi(rawFilePath);
@@ -106,11 +105,11 @@ std::string Response::generateResponse()
 {
 	std::cout << "++++++++++++++++++++++++++++  SERVER LOGS ++++++++++++++++++++++++++++" << std::endl;
 
-	std::string onlyFilePath = Utils::split(_request.getFilePath(), '?').at(0);
+	std::string onlyFilePath = Utils::split(_request.getUri(), '?').at(0);
 	Server::Location location = selectBestLocation(onlyFilePath);
 	_filePath = replaceLocationRoot(location, onlyFilePath);
 
-	std::cout << "Best location for " << _request.getFilePath() << " is " << location.path << std::endl;
+	std::cout << "Best location for " << _request.getUri() << " is " << location.path << std::endl;
 
 	std::string fileExtension = Utils::getFileExtension(_filePath);
 
@@ -118,7 +117,7 @@ std::string Response::generateResponse()
 	{
 		if (fileExtension == cgiIte->extension)
 		{
-			return createCgiResponse(*cgiIte, _request.getFilePath());
+			return createCgiResponse(*cgiIte, _request.getUri());
 		}
 	}
 

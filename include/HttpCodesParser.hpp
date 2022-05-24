@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpCodesParser.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oronda <oronda@student.42.fr>              +#+  +:+       +#+        */
+/*   By: oronda <oronda@student.42nice.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 24-05-2022 12:50 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*   Updated: 2022/05/24 16:31:38 by oronda           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <map>
 #include <exception>
 #include <string>
+#include <cstdlib>
 
 #include "./Utils.hpp"
 #include "./Errors.hpp"
