@@ -62,7 +62,6 @@ CGI ConfigParser::parseCgiLine(const std::string &line)
 		return cgi;
 
 	std::string extension = values.at(1);
-	std::cout << "EXT : " << extension << std::endl;
 	std::string path = values.at(2);
 
 	if (extension.at(0) == '.')

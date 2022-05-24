@@ -25,7 +25,6 @@ content = [
 
 contentLength = sum(len(s) for s in content)
 
-print("HTTP/1.1 200 OK")
 print("Content-Length: {clength}".format(clength = contentLength))
 print("Content-type: text/html\r\n\r\n")
 
