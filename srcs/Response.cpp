@@ -1,7 +1,7 @@
 #include "../include/Response.hpp"
 #include <algorithm>
 
-Response::Response(const Request &request,const Server &server) : _request(request) , _server(server), _protocol(_request.getProtocol())
+Response::Response(const Request &request, const Server &server) : _request(request) , _server(server), _protocol(_request.getProtocol())
 {
 	
 }
@@ -73,6 +73,21 @@ std::string Response::createFileResponse(const std::string &filePath)
 		fileToFind = "gang-bang/errors/404.html";
 	else if (_code == 403)
 		fileToFind = "gang-bang/errors/403.html";
+
+	std::cout << "server error pages count : " << _server.errorPages.size() << std::endl;
+	for (std::map<int, std::string>::const_iterator errorPagesIte = _server.errorPages.begin(); errorPagesIte != _server.errorPages.end(); ++errorPagesIte)
+	{
+		int errorCode = errorPagesIte->first;
+		std::string errorPage = errorPagesIte->second;
+
+		std::cout << "ErrorCode in config:  " <<errorCode<<std::endl;
+		if (errorCode == _code)
+		{
+			int errorPageCode = createResponseCode(errorPage);
+			if (errorPageCode >= 200 && errorPageCode < 300)
+				fileToFind = errorPage;
+		}
+	}
 
 	_content = Utils::getRawDocumentContent(fileToFind);
 	_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
