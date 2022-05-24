@@ -116,7 +116,7 @@ int main(int argc, char const *argv[])
 		std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
 
 		std::cout << responseStr.c_str();
-		send(connection, responseStr.c_str(), responseStr.size(),0);
+		send(connection, responseStr.c_str(), responseStr.size(), 0);
 		close(connection);
 
 		std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;

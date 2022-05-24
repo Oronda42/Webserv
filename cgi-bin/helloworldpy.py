@@ -1,5 +1,4 @@
 #!/usr/bin/python
-print "poet"
 
 # Import modules for CGI handling 
 import cgi, cgitb 
@@ -11,12 +10,24 @@ form = cgi.FieldStorage()
 first_name = form.getvalue('first_name')
 last_name  = form.getvalue('last_name')
 
-print "Content-type:text/html\r\n\r\n"
-print "<html>"
-print "<head>"
-print "<title>Hello - Second CGI Program</title>"
-print "</head>"
-print "<body>"
-print "<h2>Hello %s %s</h2>" % (first_name, last_name)
-print "</body>"
-print "</html>"
+#print(form.keys())
+
+content = [
+	"<html>",
+	"<head>",
+	"<title>Hello - Second CGI Program</title>",
+	"</head>",
+	"<body>",
+	"<h2>Hello {fname} {lname}</h2>".format(fname = first_name, lname = last_name),
+	"</body>",
+	"</html>"
+]
+
+contentLength = sum(len(s) for s in content)
+
+print("HTTP/1.1 200 OK")
+print("Content-Length: {clength}".format(clength = contentLength))
+print("Content-type: text/html\r\n\r\n")
+
+for s in content:
+	print(s)

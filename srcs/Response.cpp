@@ -1,7 +1,7 @@
 #include "../include/Response.hpp"
 #include <algorithm>
 
-Response::Response(const Request &request,const Server &server) : _request(request) , _server(server)
+Response::Response(const Request &request,const Server &server) : _request(request) , _server(server), _protocol(_request.getProtocol())
 {
 	
 }
@@ -14,7 +14,6 @@ struct compareByRootLength
 		return l.first.size() < r.first.size();
 	}
 };
-
 
 std::string Response::generateResponse()
 {
@@ -53,13 +52,13 @@ std::string Response::generateResponse()
 
 		if (extension == cgi.extension)
 		{
-			_content = cgi.executeCgi(oldFilePath);
-			_code="200";
-			_header = createHeader(_request.getProtocol(), _code, _status);
-			std::string response = constructResponse(_header, "", _content);
+			// _content = cgi.executeCgi(oldFilePath);
+			// _code = 200;
+			// _header = createHeader(_request.getProtocol(), _code, _status);
+			// std::string response = constructResponse(_header, "", _content);
 			//_contentType = mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())];
 			
-			return response;
+			return cgi.executeCgi(oldFilePath);;
 		}
 	}
 
@@ -68,19 +67,19 @@ std::string Response::generateResponse()
 	_code = createResponseCode(_request);
 	_status = createResponseStatus(_code);
 
-	if (_code.compare("404") == 0)
+	if (_code == 404)
 	{
 		_request.setFilePath("gang-bang/errors/404.html");
 	}
-	else if (_code.compare("403") == 0)
+	else if (_code == 403)
 	{
 		_request.setFilePath("gang-bang/errors/403.html");
 	}
 	
-	
-	_header = createHeader(_request.getProtocol(), _code, _status);
+	// _header = createHeader(_request.getProtocol(), _code, _status);
 	_contentType = mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())];
 	_content = Utils::getRawDocumentContent(this->_request.getFilePath());
+	_header = createHeader(_protocol, _code, _status, _contentType, _content.length());
 	
 	
 	extension = Utils::getFileExtension(this->_request.getFilePath());
@@ -97,10 +96,13 @@ std::string Response::constructResponse(std::string header, std::string contentT
 {
 	(void) contentType;
 	std::stringstream ss;
-	ss << header << std::endl;
-	//ss << "Content-Type: " << contentType << std::endl;
-	ss << "Content-Length: " << content.length() << std::endl;
-	//ss << std::endl;
+	// ss << header << std::endl;
+	// ss << "Content-Type: " << contentType << std::endl;
+	// ss << "Content-Length: " << content.length() << std::endl;
+	// ss << std::endl;
+
+	ss << header;
+	// ss << createHeader(_protocol, _code, _status, _contentType, _content.length());
 	// END OF HEADER
 
 	ss << content;
@@ -108,43 +110,46 @@ std::string Response::constructResponse(std::string header, std::string contentT
 	return ss.str();
 }
 
-
-std::string Response::createHeader(std::string protocol , std::string responseCode, std::string status)
+std::string Response::createHeader(const std::string &protocol,
+								   int code,
+								   const std::string &status,
+								   const std::string & contentType,
+								   int contentLength)
 {
 	std::stringstream ss;
-	ss << protocol << " ";
-	ss << responseCode << " ";
-	ss << status;
+
+	// HTTP/1.1 200 OK
+	ss << protocol << ' ' << code << ' ' << status << '\n';
+	ss << "Content-Type: " << contentType << '\n';
+	ss << "Content-Length: " << contentLength << '\n';
+	ss << std::endl;
+
 	return ss.str();
 }
 
+// std::string Response::createHeader(std::string protocol, std::string responseCode, std::string status)
+// {
+// 	std::stringstream ss;
+// 	ss << protocol << " ";
+// 	ss << responseCode << " ";
+// 	ss << status;
+// 	return ss.str();
+// }
 
-std::string Response::createResponseCode(const Request& request)
+int Response::createResponseCode(const Request& request)
 {
-
 	const char *filePath = request.getFilePath().c_str();
 	
 	FILE *fp = fopen(filePath, "r");
-	if (fp == NULL)
-	{
-		if (errno == EACCES)
-			return "403";
-		else
-			return "404";
-	}
+	if (fp == NULL && errno == EACCES)
+		return 403;
+	else if (fp == NULL)
+		return 404;
 	else
-	{
-		return "200";
-	}
-
-	// std::ifstream ifs(request.getFilePath().c_str());
-	// if(!ifs.is_open())
-	// 	return "404";
-	// else
-	// 	return "200";
+		return 200;
 }
 
-std::string Response::createResponseStatus(std::string code)
+std::string Response::createResponseStatus(int code)
 {
 	return httpCodesParser.httpCodesMap[code];
 }

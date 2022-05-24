@@ -17,18 +17,24 @@ CGI::~CGI()
 std::string CGI::executeCgi(std::string path) // pouet.php?name=frambou&status=pd
 {
 	int pid = 0;
+	std::vector<std::string> splitedUrl = Utils::split(path, '?');
 
 
-	std::string filename = Utils::split(path , '?')[0];
+	std::string filename = splitedUrl.at(0);
+
 	Utils::removeFirstSlash(filename);
 	char *argv[4] = { const_cast<char *>(execPath.c_str()),
 					const_cast<char *>(filename.c_str()),
 				   	const_cast<char *>(path.c_str()),
 				   	0 };
 
-	std::string queryString = std::string("QUERY_STRING=").append(path);
+	// QUERY_STRING is everything after '?', if no '?' set empty
+	std::string queryString = std::string("QUERY_STRING=").append(splitedUrl.size() == 2 ? splitedUrl.at(1) : "");
+
 	char *env[2] = { const_cast<char *>(queryString.c_str()),
 					0 };
+
+	//std::cout << "Query string is '" << queryString << "\n";
 
 	int fd[2];
 	pipe(fd);
@@ -55,7 +61,6 @@ std::string CGI::executeCgi(std::string path) // pouet.php?name=frambou&status=p
 			result.append(buf, readBytes);
 		}
 		close(fd[0]);
-		std::cout << "Reading from pipe: '" << result << "'\n";
 		return result;
 	}
 	return "";

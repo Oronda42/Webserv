@@ -6,7 +6,7 @@
 /*   By: oronda <oronda@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 2022/05/20 14:27:13 by oronda           ###   ########.fr       */
+/*   Updated: 24-05-2022 12:50 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ class HttpCodesParser
 {
 	public:
 		// Associates code with description
-		typedef std::map<std::string, std::string> httpCodesMap_t;
-		httpCodesMap_t   httpCodesMap;
+		typedef std::map<int, std::string> httpCodesMap_t;
+		httpCodesMap_t httpCodesMap;
 
 	private:
 		std::string _httpCodesFile;

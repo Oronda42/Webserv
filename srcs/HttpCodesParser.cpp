@@ -6,7 +6,7 @@
 /*   By: oronda <oronda@student.42nice.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 17-05-2022 15:31 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*   Updated: 24-05-2022 12:55 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,19 @@ void HttpCodesParser::parseHttpCodesFile(const std::string &httpCodesFile)
 		if (line.find_first_of(';') == line.npos)
 			throw InvalidFileException();
 
-		std::string httpCode = line.substr(line.find_last_of(' ') + 1);
-		//httpCode.pop_back(); // Remove ';' at the end
-		httpCode.erase(httpCode.length() - 1);
-		//std::cout << "Http code '" << httpCode << "' description is '" << description << "'" << std::endl;
+		std::string httpCodeStr = line.substr(line.find_last_of(' ') + 1);
+		if (httpCodeStr.at(httpCodeStr.length() - 1) == ';')
+			httpCodeStr.erase(httpCodeStr.length() - 1);
+
+		for (std::string::size_type i = 0; i < httpCodeStr.size(); ++i)
+		{
+			if (!std::isdigit(httpCodeStr.at(i)) || i > 3)
+				throw std::runtime_error("Invalid http code");
+		}
+		int httpCode = std::atoi(httpCodeStr.c_str());
 		this->httpCodesMap[httpCode] = description;
 
 	}
-	//std::cout << "Found " << this->httpCodesMap.size() << " http codes\n";
 	ifs.close();
 }
 
@@ -47,17 +52,3 @@ HttpCodesParser::HttpCodesParser(const std::string &httpCodesFile)
 {
 	this->parseHttpCodesFile(httpCodesFile);
 }
-
-
-// int main()
-// {
-// 	try
-// 	{
-// 		MimeParser pouet("mime.txt");
-
-// 	}
-// 	catch (std::exception &e)
-// 	{
-// 		std::cerr << "Exception caught: " << e.what() << std::endl;
-// 	}
-// }
