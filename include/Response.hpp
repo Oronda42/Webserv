@@ -22,21 +22,31 @@ class Response
 
 		std::string _contentType;
 		std::string _content;
+
+		std::string _filePath;
 		
-		int createResponseCode(const Request& request);
 		std::string createResponseStatus(int code);
 
 		std::string createHeader(const std::string &protocol,
 								 int code,
-								 const std::string &status,
 								 const std::string &contentType,
 								 int contentLength);
-		
-		std::string createHeader(std::string protocol , std::string responseCode, std::string status);
-		std::string constructResponse(std::string header, std::string contentType, std::string content);
-		//std::string Response::MatchLocation(const std::string &pathtoMatch,  const std::vector<Server::Location> &locations);
 
+		int createResponseCode(const std::string &filePath);
 		
+		std::string createResponseCodeStatus(const std::string &protocol, int code);
+		std::string createReponseContentLength(int contentLength);
+		std::string createReponseContentType(const std::string &contentType);
+		std::string createHeader(std::string protocol , std::string responseCode, std::string status);
+		
+		std::string constructResponse(const std::string &header, const std::string &content);
+
+		std::string createCgiResponse(const CGI &cgi, const std::string &rawFilePath);
+		std::string createFileResponse(const std::string &filePath);
+
+		std::vector<Server::Location> getSortedMatchingLocations(const std::string &filePath);		
+		Server::Location selectBestLocation(const std::string &filePath);
+		std::string replaceLocationRoot(const Server::Location &location, const std::string &filePath);
 
 		std::string getFileType(std::string filePath);
 

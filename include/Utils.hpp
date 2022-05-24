@@ -15,7 +15,6 @@ class Utils
 {
 	public:
 		std::string getFilePath(std::string &request);
-		std::string getRawDocument(std::string file_path);
 
 		static std::string get_first_line(const std::string &str)
 		{
@@ -45,7 +44,7 @@ class Utils
 			return Utils::split(s, std::string(1, separator));
 		}
 
-		static std::string getRawDocumentContent(std::string file_path)
+		static std::string getRawDocumentContent(const std::string &file_path)
 		{
 			
 			std::cout << "Getting file : " << file_path << std::endl;

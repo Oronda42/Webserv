@@ -6,141 +6,162 @@ Response::Response(const Request &request,const Server &server) : _request(reque
 	
 }
 
-struct compareByRootLength
+struct compareLocationByLength
 {
-	typedef std::pair<std::string, Server::Location> pair;
-	bool operator()(const pair &l, const pair &r) const
+	bool operator()(const Server::Location &l, const Server::Location &r) const
 	{
-		return l.first.size() < r.first.size();
+		return l.path.length() < r.path.length();
 	}
 };
+
+std::vector<Server::Location> Response::getSortedMatchingLocations(const std::string &filePath)
+{
+	std::vector<Server::Location> sortedLocations;
+
+	for (std::vector<Server::Location>::const_iterator locationIte = _server.routes.begin(); locationIte != _server.routes.end(); ++locationIte)
+	{
+		Server::Location location = *locationIte;
+		std::string locationPath = location.path;
+
+		if (filePath.find(locationPath) == 0)
+			sortedLocations.push_back(location);
+	}
+
+	std::sort(sortedLocations.begin(), sortedLocations.end(), compareLocationByLength());
+
+	return sortedLocations;
+}
+
+// Return matching location with longest root path
+Server::Location Response::selectBestLocation(const std::string &filePath)
+{
+	std::vector<Server::Location> sortedLocations = getSortedMatchingLocations(filePath);
+
+	return sortedLocations.back();
+}
+
+std::string Response::replaceLocationRoot(const Server::Location &location, const std::string &filePath)
+{
+	std::string replaced = filePath;
+	replaced.replace(0, location.path.length(), location.rootPath);
+	
+	return replaced;
+}
+
+
+
+std::string Response::createCgiResponse(const CGI &cgi, const std::string &rawFilePath)
+{
+	std::string rawCgiContent = cgi.executeCgi(rawFilePath);
+	std::string response = rawCgiContent;
+
+
+	response.insert(0, createResponseCodeStatus(_request.getProtocol(), 200));
+
+	return response;
+}
+
+std::string Response::createFileResponse(const std::string &filePath)
+{
+
+	std::string fileToFind = filePath;
+
+	_code = createResponseCode(filePath);
+	_status = createResponseStatus(_code);
+
+	if (_code == 404)
+		fileToFind = "gang-bang/errors/404.html";
+	else if (_code == 403)
+		fileToFind = "gang-bang/errors/403.html";
+
+	_content = Utils::getRawDocumentContent(fileToFind);
+	_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
+
+	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());	
+	
+	std::string extension = Utils::getFileExtension(fileToFind);
+	std::cout << "extension is " << extension << std::endl;
+	std::cout << "associated type is " << mimeParser.mimeMap.size() << ", "<< mimeParser.mimeMap.at(extension) << std::endl;
+
+	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+	return constructResponse(_header, _content);
+}
 
 std::string Response::generateResponse()
 {
 	std::cout << "++++++++++++++++++++++++++++  SERVER LOGS ++++++++++++++++++++++++++++" << std::endl;
 
-	std::string filePath = _request.getFilePath();
-	std::vector<std::pair<std::string, Server::Location> > belloFakoMapo;
+	std::string onlyFilePath = Utils::split(_request.getFilePath(), '?').at(0);
+	Server::Location location = selectBestLocation(onlyFilePath);
+	_filePath = replaceLocationRoot(location, onlyFilePath);
 
-	for (std::vector<Server::Location>::iterator routesIte = _server.routes.begin(); routesIte != _server.routes.end(); ++routesIte)
+	std::cout << "Best location for " << _request.getFilePath() << " is " << location.path << std::endl;
+
+	std::string fileExtension = Utils::getFileExtension(_filePath);
+
+	for (std::vector<CGI>::const_iterator cgiIte = location.cgis.begin(); cgiIte != location.cgis.end(); ++cgiIte)
 	{
-		std::string locationPath = routesIte->path;
-		Server::Location location = *routesIte;
-
-		if (filePath.find(locationPath) == 0)
+		if (fileExtension == cgiIte->extension)
 		{
-			belloFakoMapo.push_back(std::make_pair(locationPath, location));
-		}
-	}
-	
-	std::pair<std::string, Server::Location> last = belloFakoMapo.back();
-
-	// if (!belloFakoMapo.empty())
-	// {
-		std::sort(belloFakoMapo.begin(), belloFakoMapo.end(), compareByRootLength());
-
-		std::string oldFilePath = _request.getFilePath();
-		std::string filename = Utils::split(_request.getFilePath(), '?')[0];
-		std::string replace = filename.replace(0, belloFakoMapo.back().first.length(),belloFakoMapo.back().second.rootPath);
-		_request.setFilePath(replace);
-	// }
-		
-	std::string extension = Utils::getFileExtension(_request.getFilePath());
-	for (std::vector<CGI>::iterator cgiIte = last.second.cgis.begin(); cgiIte != last.second.cgis.end(); ++cgiIte)
-	{
-		CGI cgi = *cgiIte;
-
-		if (extension == cgi.extension)
-		{
-			// _content = cgi.executeCgi(oldFilePath);
-			// _code = 200;
-			// _header = createHeader(_request.getProtocol(), _code, _status);
-			// std::string response = constructResponse(_header, "", _content);
-			//_contentType = mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())];
-			
-			return cgi.executeCgi(oldFilePath);;
+			return createCgiResponse(*cgiIte, _request.getFilePath());
 		}
 	}
 
-	_request.setFilePath(filename);
-
-	_code = createResponseCode(_request);
-	_status = createResponseStatus(_code);
-
-	if (_code == 404)
-	{
-		_request.setFilePath("gang-bang/errors/404.html");
-	}
-	else if (_code == 403)
-	{
-		_request.setFilePath("gang-bang/errors/403.html");
-	}
-	
-	// _header = createHeader(_request.getProtocol(), _code, _status);
-	_contentType = mimeParser.mimeMap[Utils::getFileExtension(this->_request.getFilePath())];
-	_content = Utils::getRawDocumentContent(this->_request.getFilePath());
-	_header = createHeader(_protocol, _code, _status, _contentType, _content.length());
-	
-	
-	extension = Utils::getFileExtension(this->_request.getFilePath());
-	std::cout << "extension is " << extension << std::endl;
-	std::cout << "associated type is " << mimeParser.mimeMap.size() << ", "<< mimeParser.mimeMap.at(extension) << std::endl;
-
-	std::string response = constructResponse(_header, _contentType, _content);
-	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
-	return response;
-
+	return createFileResponse(_filePath);
 }
 
-std::string Response::constructResponse(std::string header, std::string contentType, std::string content)
+std::string Response::constructResponse(const std::string &header, const std::string &content)
 {
-	(void) contentType;
 	std::stringstream ss;
-	// ss << header << std::endl;
-	// ss << "Content-Type: " << contentType << std::endl;
-	// ss << "Content-Length: " << content.length() << std::endl;
-	// ss << std::endl;
 
 	ss << header;
-	// ss << createHeader(_protocol, _code, _status, _contentType, _content.length());
-	// END OF HEADER
-
 	ss << content;
 
 	return ss.str();
 }
 
+std::string Response::createResponseCodeStatus(const std::string &protocol, int code)
+{
+	std::stringstream ss;
+
+	ss << protocol << ' ' << code << ' ' << httpCodesParser.httpCodesMap[code] << '\n';
+	return ss.str();
+}
+
+std::string Response::createReponseContentLength(int contentLength)
+{
+	std::stringstream ss;
+
+	ss << "Content-Length: " << contentLength << '\n';
+	return ss.str();
+}
+
+std::string Response::createReponseContentType(const std::string &contentType)
+{
+	std::stringstream ss;
+
+	ss << "Content-Type: " << contentType << '\n';
+	return ss.str();
+}
+
 std::string Response::createHeader(const std::string &protocol,
 								   int code,
-								   const std::string &status,
 								   const std::string & contentType,
 								   int contentLength)
 {
 	std::stringstream ss;
 
-	// HTTP/1.1 200 OK
-	ss << protocol << ' ' << code << ' ' << status << '\n';
-	ss << "Content-Type: " << contentType << '\n';
-	ss << "Content-Length: " << contentLength << '\n';
+	ss << createResponseCodeStatus(protocol, code);
+	ss << createReponseContentType(contentType);
+	ss << createReponseContentLength(contentLength);
 	ss << std::endl;
 
 	return ss.str();
 }
 
-// std::string Response::createHeader(std::string protocol, std::string responseCode, std::string status)
-// {
-// 	std::stringstream ss;
-// 	ss << protocol << " ";
-// 	ss << responseCode << " ";
-// 	ss << status;
-// 	return ss.str();
-// }
-
-int Response::createResponseCode(const Request& request)
+int Response::createResponseCode(const std::string &filePath)
 {
-	const char *filePath = request.getFilePath().c_str();
-	
-	FILE *fp = fopen(filePath, "r");
+	FILE *fp = fopen(filePath.c_str(), "r");
 	if (fp == NULL && errno == EACCES)
 		return 403;
 	else if (fp == NULL)
