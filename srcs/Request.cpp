@@ -9,8 +9,25 @@ Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
 	_method = parseMethod(splited_fl);
 	_uri = parseFilePath(splited_fl);
 	_protocol = parseProtocol(splited_fl);
-	
+	_header = parseHeader(rawRequest);
+	_content = parseContent(rawRequest);
 }
+
+std::string Request::parseHeader(const std::string &rawRequest) const
+{
+	std::vector<std::string> pouet = Utils::split(rawRequest, "\n");
+	return pouet.at(0);
+}
+
+std::string Request::parseContent(const std::string &rawRequest) const
+{
+	std::vector<std::string> pouet = Utils::split(rawRequest, "\n\n");
+	return pouet.at(1);
+}
+
+std::string Request::getContent() const { return _content; }
+
+std::string Request::getHeader() const { return _header; }
 
 std::string Request::getUri() const 
 {

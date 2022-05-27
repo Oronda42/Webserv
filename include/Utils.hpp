@@ -21,6 +21,20 @@ class Utils
 			return str.substr(0, str.find('\r'));
 		}
 
+		static std::string findFirstLineStartingWith(const std::string &s, const std::string &toFind)
+		{
+			std::vector<std::string> lines = Utils::split(s, '\n');
+
+			for (std::vector<std::string>::const_iterator linesIte = lines.begin(); linesIte != lines.end(); ++linesIte)
+			{
+				std::string line = *linesIte;
+
+				if (line.find(toFind) == 0)
+					return line;
+			}
+			return "";
+		}
+
 		static std::vector<std::string> split(const std::string& s, const std::string &separator)
 		{
 			std::vector<std::string> output;

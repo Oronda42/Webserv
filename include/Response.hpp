@@ -41,7 +41,7 @@ class Response
 		
 		std::string constructResponse(const std::string &header, const std::string &content);
 
-		std::string createCgiResponse(const CGI &cgi, const std::string &rawFilePath);
+		std::string createCgiResponse(const CGI &cgi);
 		std::string createFileResponse(const std::string &filePath);
 
 		std::vector<Server::Location> getSortedMatchingLocations(const std::string &filePath);		
