@@ -24,9 +24,9 @@ void Request::parseHeaderAndContent(const std::string &rawRequest)
 	_header = rawRequest.substr(0, rawRequest.size() - contentLength - 2); // Remove \r\n of empty line
 }
 
-std::string Request::getContent() const { return _content; }
+std::string Request::getContent() const {return _content;}
 
-std::string Request::getHeader() const { return _header; }
+std::string Request::getHeader() const {return _header;}
 
 std::string Request::getUri() const 
 {

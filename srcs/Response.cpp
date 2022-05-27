@@ -63,13 +63,34 @@ std::string Response::createCgiResponse(const CGI &cgi)
 	return response;
 }
 
+int createDeleteResponseCode(int success)
+{
+	if (success == 0)
+		return 200;
+	else
+		return 204;
+}
+
 std::string Response::createFileResponse(const std::string &filePath)
 {
 
 	std::string fileToFind = filePath;
 
+	if(_request.getMethod() == "DELETE")
+	{
+		int succcess = remove(_filePath.c_str());
+		if(succcess == 0)
+		{
+			_code = createDeleteResponseCode(succcess);
+			_status = createResponseStatus(_code);
+			_content = Utils::getRawDocumentContent("resources/delete.html");
+			_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
+		}
+		return createHeader(_content, _code, _contentType, _content.length());
+	}
 	_code = createResponseCode(filePath);
 	_status = createResponseStatus(_code);
+
 
 	if (_code == 404)
 		fileToFind = "gang-bang/errors/404.html";
@@ -92,9 +113,14 @@ std::string Response::createFileResponse(const std::string &filePath)
 				fileToFind = errorPage;
 		}
 	}
+	
+	
+	
+	
+		_content = Utils::getRawDocumentContent(fileToFind);
+		_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
 
-	_content = Utils::getRawDocumentContent(fileToFind);
-	_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
+	
 
 	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());	
 	
