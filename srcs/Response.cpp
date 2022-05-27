@@ -75,6 +75,8 @@ std::string Response::createFileResponse(const std::string &filePath)
 		fileToFind = "gang-bang/errors/404.html";
 	else if (_code == 403)
 		fileToFind = "gang-bang/errors/403.html";
+	else if (_code == 400)
+		fileToFind = "gang-bang/errors/400.html";
 
 	std::cout << "server error pages count : " << _server.errorPages.size() << std::endl;
 	for (std::map<int, std::string>::const_iterator errorPagesIte = _server.errorPages.begin(); errorPagesIte != _server.errorPages.end(); ++errorPagesIte)
@@ -179,6 +181,10 @@ std::string Response::createHeader(const std::string &protocol,
 int Response::createResponseCode(const std::string &filePath)
 {
 	FILE *fp = fopen(filePath.c_str(), "r");
+
+	if (_request.getMethod() == "POST" && _request.getContent() == "")
+		return 400;
+
 	if (fp == NULL && errno == EACCES)
 		return 403;
 	else if (fp == NULL)

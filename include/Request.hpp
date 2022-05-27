@@ -4,6 +4,7 @@
 #include <iostream>
 #include "./Utils.hpp"
 #include "./MimeParser.hpp"
+#include <stdlib.h>
 
 
 class Request
@@ -20,8 +21,8 @@ class Request
 		std::string parseMethod(const std::vector<std::string> &splited_line) const;
 		std::string parseFilePath(std::vector<std::string> &splited_line);
 		std::string parseProtocol(const std::vector<std::string> &splited_line) const;
-		std::string parseHeader(const std::string &rawRequest) const;
-		std::string parseContent(const std::string &rawRequest) const;
+
+		void parseHeaderAndContent(const std::string &rawRequest);
 	
 	public:
 		Request(const std::string &rawRequest);

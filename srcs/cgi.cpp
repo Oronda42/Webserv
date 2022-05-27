@@ -24,20 +24,23 @@ std::string CGI::executeCgiPost(const std::string &uri, const std::string &heade
 					  const_cast<char *>(filename.c_str()),
 				   	  0 };
 
-	std::string contentLength = Utils::findFirstLineStartingWith(header, "Content-Length");
-	contentLength = Utils::split(contentLength, ": ").at(1);
+	std::string contentLength = Utils::findFirstLineStartingWith(header, "Content-Length: ").substr(16);
+	std::string contentType = Utils::findFirstLineStartingWith(header, "Content-Type: ").substr(14);
 
-	std::string contentType = Utils::findFirstLineStartingWith(header, "Content-Type");
-	contentType = Utils::split(contentType, ": ").at(1);
 
 	std::string contentLengthEnv("CONTENT_LENGTH=");
 	std::string contentTypeEnv("CONTENT_TYPE=");
 	std::string requestMethodEnv("REQUEST_METHOD=POST");
 
+	contentLength.erase(contentLength.size() - 1); // \r
+	contentType.erase(contentType.size() - 1);
+
 	contentLengthEnv.append(contentLength);
 	contentTypeEnv.append(contentType);
 
+	std::cout << "Executing POST CGI\n";
 	std::cout << "Content type: " << contentType << ", content length: " << contentLength << std::endl;
+
 
 	char *env[4] = { const_cast<char *>(contentLengthEnv.c_str()),
 					 const_cast<char *>(contentTypeEnv.c_str()),
@@ -50,18 +53,17 @@ std::string CGI::executeCgiPost(const std::string &uri, const std::string &heade
 	pipe(fd_in);
 
 	pid = fork();
-	if(pid == 0)
+	if (pid == 0)
 	{
 		std::cout << "Executing CGI\n";
 		close(fd[0]);
 		close(fd_in[1]);
 
 		dup2(fd[1], STDOUT_FILENO);
+		dup2(fd_in[0], STDIN_FILENO);
 
-		std::cout << content;
-
-		close(fd_in[0]);
 		close(fd[1]);
+		close(fd_in[0]);
 		execve(execPath.c_str(), argv, env);
 		std::cout << "Cannot execute " << execPath << std::endl;
 		throw std::runtime_error("CGI Execution failed");

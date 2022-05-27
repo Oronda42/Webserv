@@ -1,6 +1,5 @@
 #include "../include/Request.hpp" 
 
-
 Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
 {	
 	std::string first_line = Utils::get_first_line(_rawRequest);
@@ -9,20 +8,20 @@ Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
 	_method = parseMethod(splited_fl);
 	_uri = parseFilePath(splited_fl);
 	_protocol = parseProtocol(splited_fl);
-	_header = parseHeader(rawRequest);
-	_content = parseContent(rawRequest);
+	parseHeaderAndContent(rawRequest);
 }
 
-std::string Request::parseHeader(const std::string &rawRequest) const
+void Request::parseHeaderAndContent(const std::string &rawRequest)
 {
-	std::vector<std::string> pouet = Utils::split(rawRequest, "\n");
-	return pouet.at(0);
-}
-
-std::string Request::parseContent(const std::string &rawRequest) const
-{
-	std::vector<std::string> pouet = Utils::split(rawRequest, "\n\n");
-	return pouet.at(1);
+	std::string contentLengthStr = Utils::findFirstLineStartingWith(rawRequest, "Content-Length: ").erase(0, 16);
+	if (contentLengthStr.empty())
+	{
+		// No content length
+		_content = "";
+	}
+	int contentLength = std::atoi(contentLengthStr.c_str());
+	_content = rawRequest.substr(rawRequest.size() - contentLength);
+	_header = rawRequest.substr(0, rawRequest.size() - contentLength - 2); // Remove \r\n of empty line
 }
 
 std::string Request::getContent() const { return _content; }
