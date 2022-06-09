@@ -14,6 +14,7 @@
 #include "../include/HttpCodesParser.hpp"
 #include "../include/ConfigParser.hpp"
 
+#define BUFFER_SIZE 5
 #define PORT 8080
 #define NB_OF_CLIENTS 10
 
@@ -75,43 +76,75 @@ int main(int argc, char const *argv[])
 	else
 	std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;
 
-	while(1)
+	
+
+	//int connection;
+	int addrlen = sizeof(sockaddr);
+	int connection = accept(sockfd, (struct sockaddr*)&sockaddr, (socklen_t*) &addrlen);
+	if (connection < 0)
 	{
-		//int connection;
-		int addrlen = sizeof(sockaddr);
-		int connection = accept(sockfd, (struct sockaddr*)&sockaddr, (socklen_t*) &addrlen);
-		if (connection < 0)
+		std::cout << "Failed to grab connection. errno: " << errno << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	std::string raw_request;
+	
+	while (1)
+	{
+		//std::cout << "accepting a connection from : "<< sockaddr.sin_addr.s_addr  << std::endl;
+		char buffer[BUFFER_SIZE] = {0};
+		int r = recv(connection, buffer, BUFFER_SIZE, 0);
+		if (r < 0)
+			std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
+		raw_request.append(buffer, r);
+		
+		size_t foundPos;
+		if ((foundPos = raw_request.find("\r\n\r\n")) == std::string::npos)
 		{
-			std::cout << "Failed to grab connection. errno: " << errno << std::endl;
-			exit(EXIT_FAILURE);
+			std::cout << "WAITING FOR ALL HEADER\n";			
+			continue;
 		}
 
-		//std::cout << "accepting a connection from : "<< sockaddr.sin_addr.s_addr  << std::endl;
-	
-		char buffer[1000] = {0};
-		int r = recv(connection, buffer, 1000, 0);
-		if (r < 0)
+		break;
+	}
+
+	size_t foundPos = raw_request.find("\r\n\r\n");
+	int readContentBytes = (raw_request.size() - foundPos) - 4;
+	Request pouet(raw_request);
+
+	while(1)
+	{
+		if (pouet.getContentLength() != -1)
 		{
-			std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
+			char buffer[BUFFER_SIZE] = {0};
+			int r = recv(connection, buffer, BUFFER_SIZE, 0);
+			if (r < 0)
+				std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
+			raw_request.append(buffer, r);
+
+			readContentBytes += r;
+			if (readContentBytes != pouet.getContentLength())
+				continue;
 		}
+				
 
 		std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
 
-		std::cout << buffer;
+		std::cout << raw_request;
 
 		std::cout << "***************************************************************************" << std::endl << std::endl;
 
 
-		std::string request = buffer;
-		if (request.empty())
-		{
-			std::cout << "request is empty" << buffer << std::endl;
-			close(connection);
-			continue;
-		}
+		//std::string request = test;
+		// if (request.empty())
+		// {
+		// 	std::cout << "request is empty" << buffer << std::endl;
+		// 	close(connection);
+		// 	continue;
+		// }
 		
-		Request req(buffer);
-		Response response(req, servers[0]);
+		Request request(raw_request);
+		Response response(request, servers[0]);
 		//std::string response = create_response(request);
 								
 		std::string responseStr = response.generateResponse();
@@ -123,7 +156,7 @@ int main(int argc, char const *argv[])
 		close(connection);
 
 		std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;
-
+		break;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////

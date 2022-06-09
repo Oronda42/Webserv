@@ -11,17 +11,23 @@ Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
 	parseHeaderAndContent(rawRequest);
 }
 
+int Request::getContentLength() const { return _contentLength; }
+
 void Request::parseHeaderAndContent(const std::string &rawRequest)
 {
 	std::string contentLengthStr = Utils::findFirstLineStartingWith(rawRequest, "Content-Length: ").erase(0, 16);
 	if (contentLengthStr.empty())
 	{
 		// No content length
+		_contentLength = -1;
 		_content = "";
 	}
-	int contentLength = std::atoi(contentLengthStr.c_str());
-	_content = rawRequest.substr(rawRequest.size() - contentLength);
-	_header = rawRequest.substr(0, rawRequest.size() - contentLength - 2); // Remove \r\n of empty line
+	else
+	{
+		_contentLength = std::atoi(contentLengthStr.c_str());
+		_content = rawRequest.substr(rawRequest.size() - _contentLength);
+		_header = rawRequest.substr(0, rawRequest.size() - _contentLength - 2); // Remove \r\n of empty line
+	}
 }
 
 std::string Request::getContent() const {return _content;}
