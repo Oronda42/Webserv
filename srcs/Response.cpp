@@ -114,13 +114,8 @@ std::string Response::createFileResponse(const std::string &filePath)
 		}
 	}
 	
-	
-	
-	
 		_content = Utils::getRawDocumentContent(fileToFind);
 		_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
-
-	
 
 	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());	
 	
@@ -137,7 +132,12 @@ std::string Response::generateResponse()
 	std::cout << "++++++++++++++++++++++++++++  SERVER LOGS ++++++++++++++++++++++++++++" << std::endl;
 
 	std::string onlyFilePath = Utils::split(_request.getUri(), '?').at(0);
+	
 	Server::Location location = selectBestLocation(onlyFilePath);
+	if(!location.redirection.empty())
+	{
+		return createRedirectResponse(location.redirection);
+	}
 	_filePath = replaceLocationRoot(location, onlyFilePath);
 
 	std::cout << "Best location for " << _request.getUri() << " is " << location.path << std::endl;
@@ -155,6 +155,13 @@ std::string Response::generateResponse()
 	return createFileResponse(_filePath);
 }
 
+std::string Response::createRedirectResponse(std::string location)
+{
+	return createHeader(_request.getProtocol(), 301, location );
+	 
+	
+}
+
 std::string Response::constructResponse(const std::string &header, const std::string &content)
 {
 	std::stringstream ss;
@@ -164,6 +171,13 @@ std::string Response::constructResponse(const std::string &header, const std::st
 
 	return ss.str();
 }
+
+// std::string Response::constructResponse(const std::string &header)
+// {
+// 	std::stringstream ss;
+// 	ss << header;
+// 	return ss.str();
+// }
 
 std::string Response::createResponseCodeStatus(const std::string &protocol, int code)
 {
@@ -199,6 +213,17 @@ std::string Response::createHeader(const std::string &protocol,
 	ss << createResponseCodeStatus(protocol, code);
 	ss << createReponseContentType(contentType);
 	ss << createReponseContentLength(contentLength);
+	ss << std::endl;
+
+	return ss.str();
+}
+
+std::string Response::createHeader(const std::string &protocol, int code, std::string location)
+{
+	std::stringstream ss;
+
+	ss << createResponseCodeStatus(protocol, code);
+	ss << "Location: " << location << std::endl;
 	ss << std::endl;
 
 	return ss.str();

@@ -38,8 +38,12 @@ class Response
 		std::string createReponseContentLength(int contentLength);
 		std::string createReponseContentType(const std::string &contentType);
 		std::string createHeader(std::string protocol , std::string responseCode, std::string status);
-		
+		std::string createHeader(const std::string &protocol, int code, std::string location);
+
+		std::string constructResponse(const std::string &header);
 		std::string constructResponse(const std::string &header, const std::string &content);
+
+		std::string createRedirectResponse(std::string location);
 
 		std::string createCgiResponse(const CGI &cgi);
 		std::string createFileResponse(const std::string &filePath);
