@@ -13,7 +13,7 @@ class Request
 		std::string _rawRequest;
 		std::string _header;
 		std::string _content;
-		int         _contentLength;
+		long        _contentLength;
 
 		std::string _method;
 		std::string _uri;
@@ -27,13 +27,13 @@ class Request
 	
 	public:
 		Request(const std::string &rawRequest);
-		std::string getUri() const;
-		std::string getMethod() const;
-		std::string getProtocol() const;
-		std::string getHeader() const;
-		std::string getContent() const;
-		int         getContentLength() const;
-		void setUri(std::string str);
+		std::string  getUri() const;
+		std::string  getMethod() const;
+		std::string  getProtocol() const;
+		std::string  getHeader() const;
+		std::string  getContent() const;
+		long         getContentLength() const;
+		void         setUri(std::string str);
 		 
 };
 

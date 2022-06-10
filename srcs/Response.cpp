@@ -98,6 +98,7 @@ std::string Response::createFileResponse(const std::string &filePath)
 		fileToFind = "gang-bang/errors/403.html";
 	else if (_code == 400)
 		fileToFind = "gang-bang/errors/400.html";
+	
 
 	std::cout << "server error pages count : " << _server.errorPages.size() << std::endl;
 	for (std::map<int, std::string>::const_iterator errorPagesIte = _server.errorPages.begin(); errorPagesIte != _server.errorPages.end(); ++errorPagesIte)
@@ -176,6 +177,16 @@ std::string Response::generateResponse()
 	}
 
 	return createFileResponse(_filePath);
+}
+
+std::string Response::generateResponse(int code, const std::string &filePath)
+{
+	_code = code;
+	_status = createResponseStatus(_code);
+	_content = Utils::getRawDocumentContent(filePath);
+	_contentType = mimeParser.mimeMap[Utils::getFileExtension(filePath)];
+	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());
+	return constructResponse(_header, _content);
 }
 
 std::string Response::createRedirectResponse(std::string location)

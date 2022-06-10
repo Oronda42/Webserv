@@ -57,6 +57,7 @@ class Response
 	public:
 		Response(const Request &request, const Server &server);
 		std::string generateResponse();
+		std::string generateResponse(int code, const std::string &content);
 };
 
 #endif
