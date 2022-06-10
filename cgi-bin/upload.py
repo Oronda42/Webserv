@@ -44,26 +44,50 @@ replyhtml = """
 	<title>Document</title>
 </head>
 <body>
-	<h1 style="margin-left: 5em;">Bello Crakito</h1>
+	<div class="crackette">
+		<h1 style="margin-left: 5em;">Bello Crakito</h1>
 
-	<form action="/cgi-bin/helloworldpy.py" method="POST">
-		<label for="fname">First name:</label><br>
-		<input type="text" id="fname" name="first_name" value="Mederis"><br>
-		<label for="lname">Last name:</label><br>
-		<input type="text" id="lname" name="last_name" value="Frambourt"><br><br>
-		<input type="submit" value="Submit">
-	  </form>
+		<form action="/cgi-bin/helloworldpy.py" method="POST">
+			<label for="fname">First name:</label><br>
+			<input type="text" id="fname" name="first_name" value="Mederis"><br>
+			<label for="lname">Last name:</label><br>
+			<input type="text" id="lname" name="last_name" value="Frambourt"><br><br>
+			<input type="submit" value="Submit">
+		</form>
 
-	<img style="margin-left:15ch;" src="/images/crakette.png">
-	  <a href="/cgi-bin/helloperl.pl">Tching Tchong</a>
+		<img style="margin-left:15ch;" src="/images/crakette.png">
+		<a href="/cgi-bin/helloperl.pl">Tching Tchong</a>
 
-	  <FORM action="http://localhost:8080/cgi-bin/upload.py"
-       enctype="multipart/form-data"
-       method="post">
-	<P>
-	What files are you sending? <INPUT type="file" name="filename"><BR>
-	<INPUT type="submit" value="Send">
-	</FORM>
+		<FORM action="http://localhost:8080/cgi-bin/upload.py"
+		enctype="multipart/form-data"
+		method="post">
+		<P> What files are you sending? <INPUT type="file" name="filename"> <BR>
+		<INPUT type="submit" value="Send">
+		</FORM>
+	</div>
+
+	<div class="rondelle">
+		<h1 style="margin-left: 5em;">Bella Ronda</h1>
+
+		<form action="/cgi-bin/helloworldpy.py" method="POST">
+			<label for="fname">First name:</label><br>
+			<input type="text" id="fname" name="first_name" value="Olivier"><br>
+			<label for="lname">Last name:</label><br>
+			<input type="text" id="lname" name="last_name" value="Ronda <3"><br><br>
+			<input type="submit" value="Submit">
+		</form>
+
+		<img style="margin-left:15ch;" src="/images/rondelle.png">
+		<a href="/cgi-bin/helloperl.pl">Tching Tchong</a>
+
+		<FORM action="http://localhost:8080/cgi-bin/upload.py"
+		enctype="multipart/form-data"
+		method="post">
+		<P> What files are you sending? <INPUT type="file" name="filename"> <BR>
+		<INPUT type="submit" value="Send">
+		</FORM>
+	</div>
+
 	<p>%s</p>
 
 

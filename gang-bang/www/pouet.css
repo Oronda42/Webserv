@@ -8,6 +8,11 @@ a
 	
 }
 
+p
+{
+	color: pink;
+}
+
 .crackette {
 	color: red;
 	display: inline-block;

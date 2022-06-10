@@ -147,7 +147,7 @@ std::string Response::generateResponse()
 	if (Utils::isDirectory(_filePath))
 	{
 		std::cout << _filePath << " is a directory\n";
-		if (!location.defaultFile.empty())
+		if (!location.defaultFile.empty() && _filePath == location.rootPath)
 		{
 			_filePath = location.defaultFile;
 			std::cout << "Returning index " << location.defaultFile << std::endl;
