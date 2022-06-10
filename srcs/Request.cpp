@@ -17,17 +17,14 @@ void Request::parseHeaderAndContent(const std::string &rawRequest)
 {
 	std::string contentLengthStr = Utils::findFirstLineStartingWith(rawRequest, "Content-Length: ").erase(0, 16);
 	if (contentLengthStr.empty())
-	{
-		// No content length
 		_contentLength = -1;
-		_content = "";
-	}
 	else
-	{
 		_contentLength = std::atoi(contentLengthStr.c_str());
-		_content = rawRequest.substr(rawRequest.size() - _contentLength);
-		_header = rawRequest.substr(0, rawRequest.size() - _contentLength - 2); // Remove \r\n of empty line
-	}
+
+	
+	size_t headerEnd = rawRequest.find("\r\n\r\n");
+	_header = rawRequest.substr(0, headerEnd);
+	_content = rawRequest.substr(headerEnd + 4);
 }
 
 std::string Request::getContent() const {return _content;}

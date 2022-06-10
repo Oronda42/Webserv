@@ -9,8 +9,7 @@
 class Server 
 {
 	public:
-		
-
+	
 		// Custom routes from config, like location from nginx
 		struct Location
 		{
@@ -21,6 +20,7 @@ class Server
 			std::string defaultFile; // Default file if requested file is a folder
 			std::vector<CGI> cgis; // List of CGIs (eg. CGI .php /path/to/php/cgi)
 			std::string redirection;
+			std::string uploadDirectory;
 		};
 
 	private:
