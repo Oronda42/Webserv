@@ -152,6 +152,17 @@ std::string Response::generateResponse()
 			_filePath = location.defaultFile;
 			std::cout << "Returning index " << location.defaultFile << std::endl;
 		}
+		else if (location.directoryListing)
+		{
+			// Create a file and fill it with Utils::directoryToHtml
+			std::string directoryListing = Utils::directoryToHtml(_filePath);
+			_content = directoryListing;
+			_contentType = "text/html";
+			_code = 200;
+			_status = createResponseStatus(_code);
+			_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());
+			return constructResponse(_header, _content);
+		}
 	}
 
 	std::string fileExtension = Utils::getFileExtension(_filePath);
@@ -163,8 +174,6 @@ std::string Response::generateResponse()
 			return createCgiResponse(*cgiIte, location.uploadDirectory);
 		}
 	}
-
-	
 
 	return createFileResponse(_filePath);
 }
