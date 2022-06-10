@@ -1,0 +1,26 @@
+body {
+	background-image: url(images/dsonpied.png);
+}
+
+a
+{
+	color: yellow;
+	
+}
+
+.crackette {
+	color: red;
+	display: inline-block;
+	float: left;
+}
+
+.rondelle {
+	color: green;
+	display: inline-block;
+	float: left;
+}
+
+.under_image
+{
+	align-content: center;
+}

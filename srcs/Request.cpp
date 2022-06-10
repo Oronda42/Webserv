@@ -58,13 +58,13 @@ std::string Request::parseMethod(const std::vector<std::string> &splited_line) c
 
 std::string Request::parseFilePath(std::vector<std::string> &splited_line) 
 {
-	if (!splited_line[1].compare("/"))
-		return (ROOT);
-	else
-	{
+	// if (!splited_line[1].compare("/"))
+	// 	return (ROOT);
+	// else
+	// {
 		//removeFirstSlash(splited_line[1]);
 		return splited_line[1];
-	}
+	// }
 }
 
 std::string Request::parseProtocol(const std::vector<std::string> &splited_line) const

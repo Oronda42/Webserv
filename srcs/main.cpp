@@ -47,7 +47,6 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-
 	Server t = servers[0];
 	std::cout << "Server[0] locations " << t.routes.size() << ", error pages : " << t.errorPages.size() << std::endl;
 
