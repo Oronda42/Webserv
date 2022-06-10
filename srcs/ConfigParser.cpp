@@ -188,14 +188,16 @@ static int parsePort(const std::string &port)
 }
 
 // returns -1 on fail, or if number too long or too short (min 1MB, max UINT_MAX MB)
-static long parseBodySize(const std::string &bodySize)
+static long parseBodySize(std::string &bodySize)
 {
-	for (std::string::size_type i = 0; i < bodySize.size(); i++)
+	std::string trimmedBodySize = bodySize;
+	trimmedBodySize.erase(std::remove(trimmedBodySize.begin(), trimmedBodySize.end(), '_'), trimmedBodySize.end());
+	for (std::string::size_type i = 0; i < trimmedBodySize.size(); i++)
 	{
-		if (!std::isdigit(bodySize[i]) || i > 10)
+		if (!std::isdigit(trimmedBodySize[i]) || i > 18) // 9223372036854775807  max long (9223 petabytes so were fine for now)
 			return -1;
 	}
-	long res = std::atol(bodySize.c_str());
+	long res = std::atol(trimmedBodySize.c_str());
 	if (res > UINT_MAX || res < 1)
 		return -1;
 	return res;

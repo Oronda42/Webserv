@@ -30,7 +30,7 @@ class Server
 		std::vector<Location> routes;
 		std::vector<std::string> names;
 		unsigned short port;
-		unsigned int maxBodySize;
+		long maxBodySize;
 		std::map<int, std::string> errorPages;
 		Server();
 };

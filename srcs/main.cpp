@@ -132,7 +132,7 @@ int main(int argc, char const *argv[])
 
 		while(1)
 		{
-			if (pouet.getContentLength() != -1 && readContentBytes < pouet.getContentLength()) // Dont receeive if already read everything with one buffer (eg. small files)
+			if (pouet.getContentLength() != -1 && readContentBytes < pouet.getContentLength() && pouet.getContentLength() <= servers[0].maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
 			{
 				char buffer[BUFFER_SIZE] = {0};
 				int r = recv(connection, buffer, BUFFER_SIZE, 0);
@@ -163,8 +163,19 @@ int main(int argc, char const *argv[])
 			Request request(raw_request);
 			Response response(request, servers[0]);
 			//std::string response = create_response(request);
+
+			std::string responseStr;
+			if (pouet.getContentLength() > servers[0].maxBodySize)
+			{
+				std::cout << "Body too big :" << pouet.getContentLength() << " bytes but the server only accepts " << servers[0].maxBodySize << " at most\n";
+					
+				responseStr = response.generateResponse(413, "gang-bang/errors/413.html");
+			}
+			else
+			{
+				responseStr = response.generateResponse();
+			}
 									
-			std::string responseStr = response.generateResponse();
 
 			std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
 
