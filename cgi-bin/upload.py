@@ -6,9 +6,6 @@ sys.path.insert(0, os.getcwd())
 
 message = None
 
-# Test if the file is loaded for the upload
-if form['filename'] == '':
-	print("suce")
 if 'filename' in form:
 	fileitem = form['filename']
 	fn = os.path.basename(fileitem.filename)
