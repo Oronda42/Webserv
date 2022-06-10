@@ -1,4 +1,4 @@
-#include "../include/Response.hpp"
+#include "../includes/Response.hpp"
 #include <algorithm>
 
 Response::Response(const Request &request, const Server &server) : _request(request) , _server(server), _protocol(_request.getProtocol())

@@ -6,11 +6,11 @@
 /*   By: oronda <oronda@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 2022/05/20 14:47:06 by oronda           ###   ########.fr       */
+/*   Updated: 10-06-2022 16:42 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/MimeParser.hpp"
+#include "../includes/MimeParser.hpp"
 
 void MimeParser::parseMimeFile(const std::string &mimeFile)
 {

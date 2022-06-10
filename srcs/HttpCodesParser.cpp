@@ -6,11 +6,11 @@
 /*   By: oronda <oronda@student.42nice.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 24-05-2022 12:55 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*   Updated: 10-06-2022 16:42 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/HttpCodesParser.hpp"
+#include "../includes/HttpCodesParser.hpp"
 
 void HttpCodesParser::parseHttpCodesFile(const std::string &httpCodesFile)
 {
