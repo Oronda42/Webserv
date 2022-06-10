@@ -13,7 +13,7 @@ CGI::~CGI()
 }
 
 
-std::string CGI::executeCgiPost(const std::string &uri, const std::string &header, const std::string &content) const
+std::string CGI::executeCgiPost(const std::string &uri, const std::string &header, const std::string &content, const std::string &uploadDirectory) const
 {
 	int pid = 0;
 
@@ -31,21 +31,24 @@ std::string CGI::executeCgiPost(const std::string &uri, const std::string &heade
 	std::string contentLengthEnv("CONTENT_LENGTH=");
 	std::string contentTypeEnv("CONTENT_TYPE=");
 	std::string requestMethodEnv("REQUEST_METHOD=POST");
+	std::string uploadDirectoryEnv("UPLOAD_DIRECTORY=");
 
 	contentLength.erase(contentLength.size() - 1); // \r
 	contentType.erase(contentType.size() - 1);
 
 	contentLengthEnv.append(contentLength);
 	contentTypeEnv.append(contentType);
+	uploadDirectoryEnv.append(uploadDirectory);
 
 	std::cout << "Executing POST CGI\n";
 	std::cout << "Content type: " << contentType << ", content length: " << contentLength << std::endl;
 
 
-	char *env[4] = { const_cast<char *>(contentLengthEnv.c_str()),
+	char *env[5] = { const_cast<char *>(contentLengthEnv.c_str()),
 					 const_cast<char *>(contentTypeEnv.c_str()),
 					 const_cast<char *>(requestMethodEnv.c_str()),
-					  0 };
+					 const_cast<char *>(uploadDirectoryEnv.c_str()),
+					 0 };
 
 	int fd[2];
 	int fd_in[2];

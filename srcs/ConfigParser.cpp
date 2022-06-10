@@ -163,6 +163,10 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 		{
 			route.defaultFile = values.at(1);
 		}
+		else if (configValue == "upload_directory")
+		{
+			route.uploadDirectory = values.at(1);
+		}
 
 	}
 
@@ -268,7 +272,7 @@ std::vector<Server> ConfigParser::parseConfig()
 	std::ifstream ifs(this->_configFile.c_str());
 	std::vector<Server> servers;
 
-	if (!ifs.is_open())
+	if (!ifs.is_open() || ifs.bad())
 		throw FileNotFoundException();
 
 	std::string line;

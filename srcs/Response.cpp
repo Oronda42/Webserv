@@ -49,13 +49,13 @@ std::string Response::replaceLocationRoot(const Server::Location &location, cons
 }
 
 
-std::string Response::createCgiResponse(const CGI &cgi)
+std::string Response::createCgiResponse(const CGI &cgi, const std::string &uploadDirectory)
 {
 	std::string rawCgiContent;
 	if (_request.getMethod() == "GET")
 		rawCgiContent = cgi.executeCgiGet(_request.getUri());
 	else if (_request.getMethod() == "POST")
-		rawCgiContent = cgi.executeCgiPost(_request.getUri(), _request.getHeader(), _request.getContent());
+		rawCgiContent = cgi.executeCgiPost(_request.getUri(), _request.getHeader(), _request.getContent(), uploadDirectory);
 
 	std::string response = rawCgiContent;
 	response.insert(0, createResponseCodeStatus(_request.getProtocol(), 200));
@@ -148,7 +148,7 @@ std::string Response::generateResponse()
 	{
 		if (fileExtension == cgiIte->extension)
 		{
-			return createCgiResponse(*cgiIte);
+			return createCgiResponse(*cgiIte, location.uploadDirectory);
 		}
 	}
 
