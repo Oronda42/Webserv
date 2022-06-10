@@ -171,11 +171,11 @@ class Utils
 					{
 						if (S_ISDIR(stats.st_mode))
 						{
-							ss << "<a href=\"" << file_name << "/\">" << file_name << "/</a><br>\n";
+							ss << "<a href=\"" << file_path << "/\">" << file_name << "/</a><br>\n";
 						}
 						else
 						{
-							ss << "<a href=\"" << file_name << "\">" << file_name << "</a><br>\n";
+							ss << "<a href=\"" << file_path << "\">" << file_name << "</a><br>\n";
 						}
 					}
 				}

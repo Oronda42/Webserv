@@ -14,7 +14,7 @@
 #include "../includes/HttpCodesParser.hpp"
 #include "../includes/ConfigParser.hpp"
 
-#define BUFFER_SIZE 5
+#define BUFFER_SIZE 4000
 #define PORT 8080
 #define NB_OF_CLIENTS 10
 
@@ -132,7 +132,7 @@ int main(int argc, char const *argv[])
 
 		while(1)
 		{
-			if (pouet.getContentLength() != -1)
+			if (pouet.getContentLength() != -1 && readContentBytes < pouet.getContentLength()) // Dont receeive if already read everything with one buffer (eg. small files)
 			{
 				char buffer[BUFFER_SIZE] = {0};
 				int r = recv(connection, buffer, BUFFER_SIZE, 0);
