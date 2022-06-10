@@ -7,6 +7,7 @@
 #include <vector>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
 #include "./Errors.hpp"
 
@@ -146,6 +147,48 @@ class Utils
 		{
 			if (str.length() == 0 || str.at(str.length() - 1) != '/')
 				str.append("/");
+		}
+
+		static std::string directoryToHtml(std::string &dirPath)
+		{
+			Utils::addLastSlash(dirPath);
+
+			std::stringstream ss;
+			ss << "<!DOCTYPE html>\n<html>\n<head>\n<title>Index of " << dirPath << "</title></head><body>\n";
+			DIR *dir;
+			struct dirent *ent;
+			if ((dir = opendir(dirPath.c_str())) != NULL)
+			{
+				int filesFound = 0;
+				while ((ent = readdir(dir)) != NULL)
+				{
+					filesFound++;
+					std::string file_name = ent->d_name;
+					std::string file_path = dirPath + file_name;
+					struct stat stats;
+					std::cout << "File found " << file_path << std::endl;
+					if (stat(file_path.c_str(), &stats) == 0)
+					{
+						if (S_ISDIR(stats.st_mode))
+						{
+							ss << "<a href=\"" << file_name << "/\">" << file_name << "/</a><br>\n";
+						}
+						else
+						{
+							ss << "<a href=\"" << file_name << "\">" << file_name << "</a><br>\n";
+						}
+					}
+				}
+				ss << "<p>Total files found : " << filesFound << "</p>\n";
+				closedir(dir);
+			}
+			else
+			{
+				ss << "<p> Could not open directory " << dirPath << "</p>\n";
+			}
+			ss << "</body>\n</html>\n";
+			
+			return ss.str();
 		}
 };
 
