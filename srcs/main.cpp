@@ -8,11 +8,11 @@
 #include <errno.h>
 #include <vector>
 #include <cstdio>
-#include "../include/Request.hpp"
-#include "../include/Response.hpp"
-#include "../include/MimeParser.hpp"
-#include "../include/HttpCodesParser.hpp"
-#include "../include/ConfigParser.hpp"
+#include "../includes/Request.hpp"
+#include "../includes/Response.hpp"
+#include "../includes/MimeParser.hpp"
+#include "../includes/HttpCodesParser.hpp"
+#include "../includes/ConfigParser.hpp"
 
 #define BUFFER_SIZE 5
 #define PORT 8080

@@ -1,5 +1,5 @@
 SRCS = $(wildcard srcs/*.cpp)
-INCLUDES = include/
+INCLUDES = includes/
 
 OBJS = $(SRCS:.cpp=.o)
 
