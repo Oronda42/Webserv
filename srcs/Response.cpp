@@ -35,7 +35,9 @@ std::vector<Server::Location> Response::getSortedMatchingLocations(const std::st
 // Return matching location with longest root path
 Server::Location Response::selectBestLocation(const std::string &filePath)
 {
-	std::vector<Server::Location> sortedLocations = getSortedMatchingLocations(filePath);
+	std::string path = filePath;
+	Utils::addLastSlash(path);
+	std::vector<Server::Location> sortedLocations = getSortedMatchingLocations(path);
 
 	return sortedLocations.back();
 }
@@ -47,7 +49,6 @@ std::string Response::replaceLocationRoot(const Server::Location &location, cons
 	
 	return replaced;
 }
-
 
 std::string Response::createCgiResponse(const CGI &cgi, const std::string &uploadDirectory)
 {
@@ -73,7 +74,6 @@ int createDeleteResponseCode(int success)
 
 std::string Response::createFileResponse(const std::string &filePath)
 {
-
 	std::string fileToFind = filePath;
 
 	if(_request.getMethod() == "DELETE")
@@ -88,7 +88,7 @@ std::string Response::createFileResponse(const std::string &filePath)
 		}
 		return createHeader(_content, _code, _contentType, _content.length());
 	}
-	_code = createResponseCode(filePath);
+	_code = createResponseCode(fileToFind);
 	_status = createResponseStatus(_code);
 
 
@@ -132,6 +132,7 @@ std::string Response::generateResponse()
 	std::cout << "++++++++++++++++++++++++++++  SERVER LOGS ++++++++++++++++++++++++++++" << std::endl;
 
 	std::string onlyFilePath = Utils::split(_request.getUri(), '?').at(0);
+	Utils::removeLastSlash(onlyFilePath);
 	
 	Server::Location location = selectBestLocation(onlyFilePath);
 	if(!location.redirection.empty())
@@ -142,6 +143,17 @@ std::string Response::generateResponse()
 
 	std::cout << "Best location for " << _request.getUri() << " is " << location.path << std::endl;
 
+	std::cout << "checking if " << _filePath << " is a dir\n";
+	if (Utils::isDirectory(_filePath))
+	{
+		std::cout << _filePath << " is a directory\n";
+		if (!location.defaultFile.empty())
+		{
+			_filePath = location.defaultFile;
+			std::cout << "Returning index " << location.defaultFile << std::endl;
+		}
+	}
+
 	std::string fileExtension = Utils::getFileExtension(_filePath);
 
 	for (std::vector<CGI>::const_iterator cgiIte = location.cgis.begin(); cgiIte != location.cgis.end(); ++cgiIte)
@@ -151,6 +163,8 @@ std::string Response::generateResponse()
 			return createCgiResponse(*cgiIte, location.uploadDirectory);
 		}
 	}
+
+	
 
 	return createFileResponse(_filePath);
 }

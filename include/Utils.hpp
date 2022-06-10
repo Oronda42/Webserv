@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #include "./Errors.hpp"
 
@@ -19,6 +20,17 @@ class Utils
 		static std::string get_first_line(const std::string &str)
 		{
 			return str.substr(0, str.find('\r'));
+		}
+
+		static bool isDirectory(const std::string &filePath)
+		{
+			struct stat s;
+			if(stat(filePath.c_str(),&s) == 0)
+			{
+				if(s.st_mode & S_IFDIR)
+					return true;
+			}
+			return false;
 		}
 
 		static std::string findFirstLineStartingWith(const std::string &s, const std::string &toFind)
@@ -81,8 +93,6 @@ class Utils
 			std::string first_line = get_first_line(request);
 			std::vector<std::string> splited_fl = split(first_line, ' ');
 
-			if (!splited_fl[1].compare("/"))
-				return (ROOT);
 			std::string file_path = splited_fl[1];
 			return file_path;
 		}
@@ -124,6 +134,18 @@ class Utils
 		{
 			if (str.length() >= 1 && str.at(0) == '/')
 				str.erase(0, 1);
+		}
+
+		static void removeLastSlash(std::string &str)
+		{
+			if (str.length() >= 1 && str.at(str.length() - 1) == '/')
+				str.erase(str.length() - 1, 1);
+		}
+
+		static void addLastSlash(std::string &str)
+		{
+			if (str.length() == 0 || str.at(str.length() - 1) != '/')
+				str.append("/");
 		}
 };
 

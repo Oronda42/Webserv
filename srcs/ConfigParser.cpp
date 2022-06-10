@@ -159,7 +159,7 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 				// error
 			}
 		}
-		else if (configValue == "default")
+		else if (configValue == "index")
 		{
 			route.defaultFile = values.at(1);
 		}
