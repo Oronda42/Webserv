@@ -13,6 +13,7 @@
 #include "../includes/MimeParser.hpp"
 #include "../includes/HttpCodesParser.hpp"
 #include "../includes/ConfigParser.hpp"
+#include <poll.h>
 
 #define BUFFER_SIZE 4000
 #define PORT 8080
@@ -86,13 +87,11 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE);
 	}
 	else
-	std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;
-
-	
-
-	
+		std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;
 
 
+
+	poll()
 	while (1)
 	{	
 		//int connection;

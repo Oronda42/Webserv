@@ -34,6 +34,13 @@ class Utils
 			return false;
 		}
 
+		static std::string& trim(std::string &s, const std::string& charset)
+		{
+			s.erase(0, s.find_first_not_of(charset));
+			s.erase(s.find_last_not_of(charset) + 1);
+			return s;
+		}
+
 		static std::string findFirstLineStartingWith(const std::string &s, const std::string &toFind)
 		{
 			std::vector<std::string> lines = Utils::split(s, '\n');
@@ -69,6 +76,16 @@ class Utils
 		static std::vector<std::string> split(const std::string& s, char separator)
 		{
 			return Utils::split(s, std::string(1, separator));
+		}
+
+		static bool isNumber(const std::string &s)
+		{
+			for (size_t i = 0; i < s.size(); i++)
+			{
+				if (!std::isdigit(s[i]))
+					return false;
+			}
+			return true;
 		}
 
 		static std::string getRawDocumentContent(const std::string &file_path)

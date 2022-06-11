@@ -20,36 +20,159 @@ ConfigParser::~ConfigParser()
 	//std::cout << "destructor" << std::endl;
 }
 
-// bool ConfigParser::validateConfigFile()
-// {
-// 	std::ifstream ifs(this->_configFile.c_str());
-// 	std::stack<char> bracketStack;
+bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
+{
+	return true;
+}
 
-// 	if (!ifs.is_open())
-// 		throw FileNotFoundException();
+bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
+{
+	std::vector<std::string> tokens = Utils::split(firstLine, " \t");
+	std::string line;
 
-// 	std::string line;
-// 	while (std::getline(ifs, line))
-// 	{
-// 		std::vector<std::string> values = Utils::split(line, " \t");
+	// tokens[0] should always be "server"
+	if (tokens.size() > 2)
+	{
+		// Only possible cases are "server {" and "server \n {" (bracket on another line)
+		return false;
+	}
+	else if (tokens.size() == 2)
+	{
+		if (tokens.at(1) != "{")
+			return false;
+	}
+	else
+	{
+		std::getline(ifs, line);
+		if (Utils::trim(line, " \n\t") != "{")
+			return false;
+	}
 
-// 		if (values.empty())
-// 			continue;
+	std::string configValue;
+	bool portFound = false;
+	bool serverNamesFound = false;
+	bool maxClientBodySizeFound = false;
+	std::vector<std::string> errorPagesList; // only the code
+	std::vector<std::string> locationsList; // only the path
 
-// 		for (std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it)
-// 		{
-// 			if (*it == "{")
-// 				bracketStack.push('{');
-// 			else if (*it == "}")
-// 				bracketStack.push('}');
-// 		}
+	while (std::getline(ifs, line))
+	{
+		if (line.empty())
+			continue;
 
-// 		std::string configValue = values.at(0);
-// 	}
+		tokens = Utils::split(line, " \t");
+		if (tokens.empty())
+			continue;
 
-// 	if (!bracketStack.empty())
-// 		throw pouet;
-// }
+		std::string configValue = tokens.at(0);
+	
+		if (configValue == "}")
+		{
+			if (tokens.size() > 1)
+			{
+				std::cerr << "Found invalid characters after the server closing bracket" << std::endl;
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+		else if (configValue == "port")
+		{
+			if (portFound)
+			{
+				std::cerr << "Duplicate port on line '" << line << "'" << std::endl;
+				return false;
+			}
+			if (tokens.size() != 2 || !Utils::isNumber(tokens.at(1)))
+			{
+				std::cerr << "Invalid port value on line '" << line << "'" << std::endl;
+				return false;
+			}
+			portFound = true;
+		}
+		else if (configValue == "server_names")
+		{
+			if (serverNamesFound)
+			{
+				std::cerr << "Duplicate server_names on line '" << line << "'" << std::endl;
+				return false;
+			}
+			serverNamesFound = true;
+		}
+		else if (configValue == "error_page")
+		{
+			if (tokens.size() != 3 || !Utils::isNumber(tokens.at(1)))
+			{
+				std::cerr << "Invalid error_page value on line '" << line << "'" << std::endl;
+				return false;
+			}
+
+			for (std::vector<std::string>::iterator it = errorPagesList.begin(); it != errorPagesList.end(); ++it)
+			{
+				if (*it == tokens.at(1))
+				{
+					std::cerr << "Duplicate error_page on line '" << line << "'" << std::endl;
+					return false;
+				}
+			}
+
+			errorPagesList.push_back(tokens.at(1));
+		}
+		else if (configValue == "max_client_body_size")
+		{
+			if (maxClientBodySizeFound)
+			{
+				std::cerr << "Duplicate max_client_body_size on line '" << line << "'" << std::endl;
+				return false;
+			}
+			maxClientBodySizeFound = true;
+		}
+		else if (configValue == "location")
+		{
+			if (validateOneLocation(ifs, line) == false)
+				return false;
+		}
+		else
+		{
+			std::cerr << "Invalid line '" << line << "'" << std::endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+bool ConfigParser::validateConfigFile()
+{
+	std::ifstream ifs(this->_configFile.c_str());
+	std::stack<char> bracketStack;
+
+	if (!ifs.is_open())
+		throw FileNotFoundException();
+
+	std::string line;
+	while (std::getline(ifs, line))
+	{
+		std::vector<std::string> values = Utils::split(line, " \t");
+
+		if (values.empty())
+			continue;
+
+		for (std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it)
+		{
+			if (*it == "{")
+				bracketStack.push('{');
+			else if (*it == "}")
+				bracketStack.push('}');
+		}
+
+		std::string configValue = values.at(0);
+	}
+
+	if (!bracketStack.empty())
+		throw pouet;
+}
 
 CGI ConfigParser::parseCgiLine(const std::string &line)
 {
@@ -245,7 +368,7 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 				std::getline(ifs, line);
 			server.routes.push_back(this->parseOneRoute(ifs, values.at(1)));
 		}
-		else if (configValue == "server_name")
+		else if (configValue == "server_names")
 		{
 			server.names.assign(values.begin() + 1, values.end());
 		}
@@ -253,7 +376,7 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 		{
 			server.port = parsePort(values.at(1));
 		}
-		else if (configValue == "client_body_size")
+		else if (configValue == "max_client_body_size")
 		{
 			server.maxBodySize = parseBodySize(values.at(1));
 		}
