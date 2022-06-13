@@ -22,6 +22,121 @@ ConfigParser::~ConfigParser()
 
 bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 {
+	std::vector<std::string> tokens = Utils::split(firstLine, " \t");
+	std::string line;
+
+	if (tokens.size() > 3 || tokens.size() < 2)
+		return false;
+	else if (tokens.size() == 3)
+	{
+		if (tokens.at(2) != "{")
+			return false;
+	}
+	else
+	{
+		std::getline(ifs, line);
+		if (Utils::trim(line) != "{")
+			return false;
+	}
+
+
+	bool acceptedMethodsFound = false;
+	bool redirectionFound = false;
+	bool directoryListingFound = false;
+	bool indexFound = false;
+	bool uploadDirectoryFound = false;
+	bool rootFound = false;
+	std::vector<std::string> cgiList;
+
+
+	while (std::getline(ifs, line))
+	{
+		if (line.empty())
+			continue;
+
+		tokens = Utils::split(line, " \t");
+
+		if (tokens.empty())
+			continue;
+
+		std::string configValue = tokens.at(0);
+
+		if (configValue == "}")
+		{
+			if (tokens.size() > 1)
+			{
+				std::cerr << "Found invalid characters after the server closing bracket" << std::endl;
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+		else if (configValue == "methods")
+		{
+			if (acceptedMethodsFound)
+			{
+				std::cerr << "Duplicate accepted methods on line '" << line << "'" << std::endl;
+				return false;
+			}
+			std::vector<std::string> methodsList;
+			methodsList.push_back("GET");
+			methodsList.push_back("POST");
+			methodsList.push_back("DELETE");
+
+			for (std::vector<std::string>::iterator it = values.begin() + 1; it != values.end(); ++it)
+			{
+				std::string method = *it;
+				if (std::find(methodsList.begin(), methodsList.end(), method) == methodsList.end())
+				{
+					std::cerr << "Method '" << method << "' invalid in location '" << firstLine << "'" << std::endl;
+					return false;
+				}
+			}
+			acceptedMethodsFound = true;
+		}
+		else if (configvalue == "redirect")
+		{
+			if (redirectionFound)
+			{
+				std::cerr << "Duplicate redirect on line '" << line << "'" << std::endl;
+				return false;
+			}
+			redirectionFound = true;
+		}
+		else if (configValue == "directory_listing")
+		{
+			if (directoryListingFound)
+			{
+				std::cerr << "Duplicate directory listing on line '" << line << "'" << std::endl;
+				return false;
+			}
+			std::string value = tokens.at(1);
+			if (value == "on" || value == "true")
+			{
+				route.directoryListing = true;
+			}
+			else if (value == "off" || value == "false")
+			{
+				route.directoryListing = false;
+			}
+			if (value != "on" && value != )
+			{
+				// error
+			}
+			directoryListingFound = true;
+		}
+
+
+	}
+
+	if (!rootFound)
+	{
+		std::cerr << "root is mandatory in location '" << firstLine << "'" << std::endl;
+		return false;
+	}
+
 	return true;
 }
 
@@ -229,30 +344,30 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 		{
 			std::vector<std::string> methodsList;
 			methodsList.push_back("GET");
-			methodsList.push_back("HEAD");
+			//methodsList.push_back("HEAD");
 			methodsList.push_back("POST");
-			methodsList.push_back("PUT");
+			//methodsList.push_back("PUT");
 			methodsList.push_back("DELETE");
-			methodsList.push_back("CONNECT");
-			methodsList.push_back("OPTIONS");
-			methodsList.push_back("TRACE");
-			methodsList.push_back("PATCH");
+			// methodsList.push_back("CONNECT");
+			// methodsList.push_back("OPTIONS");
+			// methodsList.push_back("TRACE");
+			// methodsList.push_back("PATCH");
 
 			
 			// todo something if not right
 			for (std::vector<std::string>::iterator it = values.begin() + 1; it != values.end(); ++it)
 			{
 				std::string method = *it;
-				if (std::find(methodsList.begin(), methodsList.end(), method) != methodsList.end())
-				{
-					route.acceptedHttpMethods.push_back(method);
-				}
-				else
-				{
-					// todo
-					std::cerr << "Method '" << method << "' invalid, :sadge:" << std::endl;
-					//break;
-				}
+				route.acceptedHttpMethods.push_back(method);
+				// if (std::find(methodsList.begin(), methodsList.end(), method) != methodsList.end())
+				// {
+				// }
+				// else
+				// {
+				// 	// todo
+				// 	std::cerr << "Method '" << method << "' invalid, :sadge:" << std::endl;
+				// 	//break;
+				// }
 			}
 		}
 		else if (configValue == "redirect")
