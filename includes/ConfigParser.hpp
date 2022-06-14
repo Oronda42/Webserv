@@ -34,6 +34,9 @@ class ConfigParser
 		// bool CheckBrackets(std::string configFile);
 		bool CheckDirective(std::string line);
 		bool validateConfigFile();
+		bool validateOneServer(std::ifstream &ifs, const std::string &firstLine);
+		bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine);
+
 		// bool CheckBlocks(std::string configFile, std::vector<std::string> directives);
 		// bool CheckContexts(std::string configFile, std::vector<std::string> directives);
 

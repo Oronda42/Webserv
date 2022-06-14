@@ -6,7 +6,7 @@
 /*   By: oronda <oronda@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 2022/05/27 15:25:49 by oronda           ###   ########.fr       */
+/*   Updated: 14-06-2022 13:14 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,15 @@ class InvalidFileException : public std::exception
 		char const *what() const throw()
 		{
 			return "Invalid file";
+		}
+};
+
+class ConfigFileError : public std::exception
+{
+	public:
+		char const *what() const throw()
+		{
+			return "Config is not valid";
 		}
 };
 
