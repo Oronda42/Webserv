@@ -47,6 +47,11 @@ int main(int argc, char const *argv[])
 		std::cout << "Cannot open file " << configFile << std::endl;
 		exit(EXIT_FAILURE);
 	}
+	catch (ConfigFileError &e)
+	{
+		std::cerr << "Error in config file " << configFile << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	Server t = servers[0];
 	std::cout << "Server[0] locations " << t.routes.size() << ", error pages : " << t.errorPages.size() << std::endl;
@@ -91,7 +96,6 @@ int main(int argc, char const *argv[])
 
 
 
-	poll()
 	while (1)
 	{	
 		//int connection;

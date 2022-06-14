@@ -12,15 +12,18 @@
 
 ConfigParser::ConfigParser(const std::string &configFile) : _configFile(configFile)
 {
-
+	if (this->validateConfigFile() == false)
+	{
+		throw ConfigFileError();
+	}
 }
 
 ConfigParser::~ConfigParser()
 {
-	//std::cout << "destructor" << std::endl;
+	// std::cout << "destructor" << std::endl;
 }
 
-bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
+bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 {
 	std::vector<std::string> tokens = Utils::split(firstLine, " \t");
 	std::string line;
@@ -34,9 +37,15 @@ bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 	}
 	else
 	{
-		std::getline(ifs, line);
-		if (Utils::trim(line) != "{")
-			return false;
+		while (std::getline(ifs, line))
+		{
+			if (line.empty())
+				continue;
+			else if (Utils::trim(line, " \n\t") != "{")
+				return false;
+			else
+				break;
+		}
 	}
 
 
@@ -47,7 +56,6 @@ bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 	bool uploadDirectoryFound = false;
 	bool rootFound = false;
 	std::vector<std::string> cgiList;
-
 
 	while (std::getline(ifs, line))
 	{
@@ -61,15 +69,26 @@ bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 
 		std::string configValue = tokens.at(0);
 
+		if (configValue != "}" && tokens.size() < 2)
+		{
+			std::cerr << "No arguments after '" << configValue << "'" << std::endl;
+			return false;
+		}
+
 		if (configValue == "}")
 		{
 			if (tokens.size() > 1)
 			{
-				std::cerr << "Found invalid characters after the server closing bracket" << std::endl;
+				std::cerr << "Found invalid characters after the location closing bracket" << std::endl;
 				return false;
 			}
 			else
 			{
+				if (!rootFound)
+				{
+					std::cerr << "root is mandatory in location '" << firstLine << "'" << std::endl;
+					return false;
+				}
 				return true;
 			}
 		}
@@ -77,7 +96,7 @@ bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 		{
 			if (acceptedMethodsFound)
 			{
-				std::cerr << "Duplicate accepted methods on line '" << line << "'" << std::endl;
+				std::cerr << "Duplicate accepted methods on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 				return false;
 			}
 			std::vector<std::string> methodsList;
@@ -85,7 +104,7 @@ bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 			methodsList.push_back("POST");
 			methodsList.push_back("DELETE");
 
-			for (std::vector<std::string>::iterator it = values.begin() + 1; it != values.end(); ++it)
+			for (std::vector<std::string>::iterator it = tokens.begin() + 1; it != tokens.end(); ++it)
 			{
 				std::string method = *it;
 				if (std::find(methodsList.begin(), methodsList.end(), method) == methodsList.end())
@@ -96,51 +115,92 @@ bool validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 			}
 			acceptedMethodsFound = true;
 		}
-		else if (configvalue == "redirect")
+		else if (configValue == "redirect")
 		{
 			if (redirectionFound)
 			{
-				std::cerr << "Duplicate redirect on line '" << line << "'" << std::endl;
+				std::cerr << "Duplicate redirect on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 				return false;
 			}
 			redirectionFound = true;
+		}
+		else if (configValue == "root")
+		{
+			if (rootFound)
+			{
+				std::cerr << "Duplicate root on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				return false;
+			}
+			rootFound = true;
 		}
 		else if (configValue == "directory_listing")
 		{
 			if (directoryListingFound)
 			{
-				std::cerr << "Duplicate directory listing on line '" << line << "'" << std::endl;
+				std::cerr << "Duplicate directory listing on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 				return false;
 			}
 			std::string value = tokens.at(1);
-			if (value == "on" || value == "true")
+			if (value != "on" && value != "true" && value != "off" && value != "false")
 			{
-				route.directoryListing = true;
-			}
-			else if (value == "off" || value == "false")
-			{
-				route.directoryListing = false;
-			}
-			if (value != "on" && value != )
-			{
-				// error
+				std::cerr << "Invalid value for directory listing on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				return false;
 			}
 			directoryListingFound = true;
 		}
-
-
+		else if (configValue == "index")
+		{
+			if (indexFound)
+			{
+				std::cerr << "Duplicate index on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				return false;
+			}
+			indexFound = true;
+		}
+		else if (configValue == "upload_directory")
+		{
+			if (uploadDirectoryFound)
+			{
+				std::cerr << "Duplicate upload directory on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				return false;
+			}
+			uploadDirectoryFound = true;
+		}
+		else if (configValue == "cgi")
+		{
+			if (tokens.size() != 3)
+			{
+				std::cerr << "Invalid number of arguments for cgi on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				return false;
+			}
+			std::string cgi = tokens.at(1);
+			if (cgi.empty() || cgi.at(0) != '.')
+			{
+				std::cerr << "Invalid cgi format (expected .xyz) on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				return false;
+			}
+			for (std::vector<std::string>::iterator it = cgiList.begin(); it != cgiList.end(); ++it)
+			{
+				if (*it == cgi)
+				{
+					std::cerr << "Duplicate cgi '" << cgi << "' on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+					return false;
+				}
+			}
+			cgiList.push_back(cgi);
+		}
+		else
+		{
+			std::cerr << "Invalid line in location: '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+			return false;
+		}
 	}
-
-	if (!rootFound)
-	{
-		std::cerr << "root is mandatory in location '" << firstLine << "'" << std::endl;
-		return false;
-	}
-
-	return true;
+	// No '}' found so return false
+	std::cerr << "No closing bracket found for location" << std::endl;
+	return false;
 }
 
-bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
+bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 {
 	std::vector<std::string> tokens = Utils::split(firstLine, " \t");
 	std::string line;
@@ -148,19 +208,28 @@ bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 	// tokens[0] should always be "server"
 	if (tokens.size() > 2)
 	{
-		// Only possible cases are "server {" and "server \n {" (bracket on another line)
+		std::cerr << "Expected '{' after server on line '" << firstLine << "'" << std::endl;		// Only possible cases are "server {" and "server \n {" (bracket on another line)
 		return false;
 	}
 	else if (tokens.size() == 2)
 	{
 		if (tokens.at(1) != "{")
+		{
+			std::cerr << "Expected '{' after server on line '" << firstLine << "'" << std::endl;
 			return false;
+		}
 	}
 	else
 	{
-		std::getline(ifs, line);
-		if (Utils::trim(line, " \n\t") != "{")
-			return false;
+		while (std::getline(ifs, line))
+		{
+			if (line.empty())
+				continue;
+			else if (Utils::trim(line, " \n\t") != "{")
+				return false;
+			else
+				break;
+		}
 	}
 
 	std::string configValue;
@@ -181,6 +250,12 @@ bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 
 		std::string configValue = tokens.at(0);
 	
+		if (configValue != "}" && tokens.size() < 2)
+		{
+			std::cerr << "No arguments after '" << configValue << "'" << std::endl;
+			return false;
+		}
+
 		if (configValue == "}")
 		{
 			if (tokens.size() > 1)
@@ -197,12 +272,12 @@ bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 		{
 			if (portFound)
 			{
-				std::cerr << "Duplicate port on line '" << line << "'" << std::endl;
+				std::cerr << "Duplicate port on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 				return false;
 			}
 			if (tokens.size() != 2 || !Utils::isNumber(tokens.at(1)))
 			{
-				std::cerr << "Invalid port value on line '" << line << "'" << std::endl;
+				std::cerr << "Invalid port value on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 				return false;
 			}
 			portFound = true;
@@ -211,7 +286,7 @@ bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 		{
 			if (serverNamesFound)
 			{
-				std::cerr << "Duplicate server_names on line '" << line << "'" << std::endl;
+				std::cerr << "Duplicate server_names on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 				return false;
 			}
 			serverNamesFound = true;
@@ -220,7 +295,7 @@ bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 		{
 			if (tokens.size() != 3 || !Utils::isNumber(tokens.at(1)))
 			{
-				std::cerr << "Invalid error_page value on line '" << line << "'" << std::endl;
+				std::cerr << "Invalid error_page value on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 				return false;
 			}
 
@@ -228,7 +303,7 @@ bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 			{
 				if (*it == tokens.at(1))
 				{
-					std::cerr << "Duplicate error_page on line '" << line << "'" << std::endl;
+					std::cerr << "Duplicate error_page on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 					return false;
 				}
 			}
@@ -239,7 +314,12 @@ bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 		{
 			if (maxClientBodySizeFound)
 			{
-				std::cerr << "Duplicate max_client_body_size on line '" << line << "'" << std::endl;
+				std::cerr << "Duplicate max_client_body_size on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				return false;
+			}
+			if (tokens.at(1).find_first_not_of("0123456789_") != std::string::npos)
+			{
+				std::cerr << "Invalid max_client_body_size value on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 				return false;
 			}
 			maxClientBodySizeFound = true;
@@ -251,11 +331,13 @@ bool validateOneServer(std::ifstream &ifs, const std::string &firstLine)
 		}
 		else
 		{
-			std::cerr << "Invalid line '" << line << "'" << std::endl;
+			std::cerr << "Invalid line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
 			return false;
 		}
 	}
-	return true;
+	// No '}' found so return false
+	std::cerr << "No closing bracket found for server" << std::endl;
+	return false;
 }
 
 bool ConfigParser::validateConfigFile()
@@ -269,24 +351,26 @@ bool ConfigParser::validateConfigFile()
 	std::string line;
 	while (std::getline(ifs, line))
 	{
-		std::vector<std::string> values = Utils::split(line, " \t");
+		std::vector<std::string> tokens = Utils::split(line, " \t");
 
-		if (values.empty())
+		if (tokens.empty())
 			continue;
 
-		for (std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it)
+		std::string configValue = tokens.at(0);
+
+		if (configValue == "server")
 		{
-			if (*it == "{")
-				bracketStack.push('{');
-			else if (*it == "}")
-				bracketStack.push('}');
+			if (validateOneServer(ifs, line) == false)
+				return false;
 		}
-
-		std::string configValue = values.at(0);
+		else
+		{
+			// We are outside a server
+			std::cerr << "Invalid line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+			return false;
+		}
 	}
-
-	if (!bracketStack.empty())
-		throw pouet;
+	return true;
 }
 
 CGI ConfigParser::parseCgiLine(const std::string &line)
@@ -323,7 +407,7 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 		if (line.empty())
 			continue;
 		
-		//std::cout << "location line : " << line << std::endl;
+		//std::cout << "location line : " << Utils::trim(line, " \n\t") << std::endl;
 		std::vector<std::string> values = Utils::split(line, " \t");
 		
 		if (values.empty())
@@ -405,6 +489,11 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 		{
 			route.uploadDirectory = values.at(1);
 		}
+		else
+		{
+			std::cerr << "Invalid line in server: '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+			return route;
+		}
 
 	}
 
@@ -464,7 +553,7 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 		if (line.empty())
 			continue;
 		
-		//std::cout << "server line : " << line << std::endl;
+		//std::cout << "server line : " << Utils::trim(line, " \n\t") << std::endl;
 		std::vector<std::string> values = Utils::split(line, " \t");
 
 		if (values.empty())
