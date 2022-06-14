@@ -42,7 +42,10 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 			if (line.empty())
 				continue;
 			else if (Utils::trim(line, " \n\t") != "{")
+			{
+				std::cerr << "Expected '{' after location on line '" << firstLine << "'" << std::endl;
 				return false;
+			}
 			else
 				break;
 		}
@@ -226,7 +229,10 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 			if (line.empty())
 				continue;
 			else if (Utils::trim(line, " \n\t") != "{")
+			{
+				std::cerr << "Expected '{' after server on line '" << firstLine << "'" << std::endl;
 				return false;
+			}
 			else
 				break;
 		}
@@ -566,10 +572,17 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 
 		if (configValue == "location")
 		{
-			// todo check size / numbers of words
-			//std::cout << "parsing location\n";
-			if (values.size() == 1 && values.at(0) == "{")
-				std::getline(ifs, line);
+			if (values.size() != 3)
+			{
+				// { on other line
+				while (std::getline(ifs, line))
+				{
+					if (line.empty())
+						continue;
+					else
+						break;
+				}
+			}
 			server.routes.push_back(this->parseOneRoute(ifs, values.at(1)));
 		}
 		else if (configValue == "server_names")
@@ -611,22 +624,20 @@ std::vector<Server> ConfigParser::parseConfig()
 			continue;
 
 		std::vector<std::string> values = Utils::split(line, " \t");
+
+		// it's either 'server {' or 'server \n {'
 		if (values.size() == 1 && values.at(0) == "server")
 		{
-			//std::cout << "parsing server\n";
-			
-			if (values.size() == 1 && values.at(0) == "{")
-				std::getline(ifs, line);
-			servers.push_back(this->parseOneServer(ifs));
-		}
-		else
-		{
-			//std::cout << "Line\n";
-			for (std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it)
+			while (std::getline(ifs, line))
 			{
-				//std::cout << "Split : " << *it << std::endl;
+				// no need to check for '{' as it is checked before
+				if (line.empty())
+					continue;
+				else
+					break;
 			}
 		}
+		servers.push_back(this->parseOneServer(ifs));
 	}
 
 
