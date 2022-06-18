@@ -39,9 +39,10 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 	{
 		while (std::getline(ifs, line))
 		{
-			if (line.empty())
+			std::string trimmedLine = Utils::trim(line, " \n\t");
+			if (trimmedLine.empty() || trimmedLine.at(0) == '#')
 				continue;
-			else if (Utils::trim(line, " \n\t") != "{")
+			else if (trimmedLine != "{")
 			{
 				std::cerr << "Expected '{' after location on line '" << firstLine << "'" << std::endl;
 				return false;
@@ -67,7 +68,7 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 
 		tokens = Utils::split(line, " \t");
 
-		if (tokens.empty())
+		if (tokens.empty() || tokens.at(0) == "#")
 			continue;
 
 		std::string configValue = tokens.at(0);
@@ -226,9 +227,10 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 	{
 		while (std::getline(ifs, line))
 		{
-			if (line.empty())
+			std::string trimmedLine = Utils::trim(line, " \n\t");
+			if (trimmedLine.empty() || trimmedLine.at(0) == '#')
 				continue;
-			else if (Utils::trim(line, " \n\t") != "{")
+			else if (trimmedLine != "{")
 			{
 				std::cerr << "Expected '{' after server on line '" << firstLine << "'" << std::endl;
 				return false;
@@ -251,7 +253,7 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 			continue;
 
 		tokens = Utils::split(line, " \t");
-		if (tokens.empty())
+		if (tokens.empty() || tokens.at(0) == "#")
 			continue;
 
 		std::string configValue = tokens.at(0);
@@ -359,7 +361,7 @@ bool ConfigParser::validateConfigFile()
 	{
 		std::vector<std::string> tokens = Utils::split(line, " \t");
 
-		if (tokens.empty())
+		if (tokens.empty() || tokens.at(0) == "#")
 			continue;
 
 		std::string configValue = tokens.at(0);
@@ -416,7 +418,7 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 		//std::cout << "location line : " << Utils::trim(line, " \n\t") << std::endl;
 		std::vector<std::string> values = Utils::split(line, " \t");
 		
-		if (values.empty())
+		if (values.empty() || values.at(0) == "#")
 			continue;
 
 		if (values.back() == "}")
@@ -531,7 +533,7 @@ static long parseBodySize(std::string &bodySize)
 			return -1;
 	}
 	long res = std::atol(trimmedBodySize.c_str());
-	if (res > UINT_MAX || res < 1)
+	if (res < 0)
 		return -1;
 	return res;
 }
@@ -562,7 +564,7 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 		//std::cout << "server line : " << Utils::trim(line, " \n\t") << std::endl;
 		std::vector<std::string> values = Utils::split(line, " \t");
 
-		if (values.empty())
+		if (values.empty() || values.at(0) == "#")
 			continue;
 
 		if (values.back() == "}")
@@ -577,7 +579,8 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 				// { on other line
 				while (std::getline(ifs, line))
 				{
-					if (line.empty())
+					std::string trimmedLine = Utils::trim(line, " \n\t");
+					if (trimmedLine.empty() || trimmedLine.at(0) == '#')
 						continue;
 					else
 						break;
@@ -631,7 +634,8 @@ std::vector<Server> ConfigParser::parseConfig()
 			while (std::getline(ifs, line))
 			{
 				// no need to check for '{' as it is checked before
-				if (line.empty())
+				std::string trimmedLine = Utils::trim(line, " \n\t");
+				if (trimmedLine.empty() || trimmedLine.at(0) == '#')
 					continue;
 				else
 					break;
