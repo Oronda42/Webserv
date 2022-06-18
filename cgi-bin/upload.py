@@ -55,7 +55,7 @@ replyhtml = """
 		<img style="margin-left:15ch;" src="/images/crakette.png">
 		<a href="/cgi-bin/helloperl.pl">Tching Tchong</a>
 
-		<FORM action="http://localhost:8080/cgi-bin/upload.py"
+		<FORM action="/cgi-bin/upload.py"
 		enctype="multipart/form-data"
 		method="post">
 		<P> What files are you sending? <INPUT type="file" name="filename"> <BR>
@@ -77,7 +77,7 @@ replyhtml = """
 		<img style="margin-left:15ch;" src="/images/rondelle.png">
 		<a href="/cgi-bin/helloperl.pl">Tching Tchong</a>
 
-		<FORM action="http://localhost:8080/cgi-bin/upload.py"
+		<FORM action="/cgi-bin/upload.py"
 		enctype="multipart/form-data"
 		method="post">
 		<P> What files are you sending? <INPUT type="file" name="filename"> <BR>
