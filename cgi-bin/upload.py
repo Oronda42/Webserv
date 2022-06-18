@@ -91,4 +91,5 @@ replyhtml = """
 </body>
 </html>
 """
+print ("Content-type: text/html\r\n")
 print(replyhtml % message)
