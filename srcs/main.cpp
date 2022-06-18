@@ -18,6 +18,7 @@
 #define BUFFER_SIZE 4000
 #define PORT 8080
 #define NB_OF_CLIENTS 10
+#define DEBUG 1
 
 #define ROOT "/index.html"
 
@@ -131,11 +132,11 @@ int main(int argc, char const *argv[])
 
 		size_t foundPos = raw_request.find("\r\n\r\n");
 		int readContentBytes = (raw_request.size() - foundPos) - 4;
-		Request pouet(raw_request);
+		Request onlyHeaderRequest(raw_request);
 
 		while(1)
 		{
-			if (pouet.getContentLength() != -1 && readContentBytes < pouet.getContentLength() && pouet.getContentLength() <= servers[0].maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
+			if (onlyHeaderRequest.getContentLength() != -1 && readContentBytes < onlyHeaderRequest.getContentLength() && onlyHeaderRequest.getContentLength() <= servers[0].maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
 			{
 				char buffer[BUFFER_SIZE] = {0};
 				int r = recv(connection, buffer, BUFFER_SIZE, 0);
@@ -144,16 +145,16 @@ int main(int argc, char const *argv[])
 				raw_request.append(buffer, r);
 
 				readContentBytes += r;
-				if (readContentBytes != pouet.getContentLength())
+				if (readContentBytes != onlyHeaderRequest.getContentLength())
 					continue;
 			}
 					
 
-			std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
+			// std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
 
-			std::cout << raw_request;
+			// std::cout << raw_request;
 
-			std::cout << "***************************************************************************" << std::endl << std::endl;
+			// std::cout << "***************************************************************************" << std::endl << std::endl;
 
 			//std::string request = test;
 			// if (request.empty())
@@ -168,25 +169,33 @@ int main(int argc, char const *argv[])
 			//std::string response = create_response(request);
 
 			std::string responseStr;
-			if (pouet.getContentLength() > servers[0].maxBodySize)
+			if (onlyHeaderRequest.getContentLength() > servers[0].maxBodySize && servers[0].maxBodySize != -1)
 			{
-				std::cout << "Body too big :" << pouet.getContentLength() << " bytes but the server only accepts " << servers[0].maxBodySize << " at most\n";
+				if (DEBUG)
+					std::cout << "Body too big :" << onlyHeaderRequest.getContentLength() << " bytes but the server only accepts " << servers[0].maxBodySize << " at most\n";
 					
-				responseStr = response.generateResponse(413, "gang-bang/errors/413.html");
+				// responseStr = response.generateResponse(404, "resources/errors/404.html");
+				responseStr = response.generateResponse(200, "gang-bang/www/index.html");
 			}
 			else
 			{
 				responseStr = response.generateResponse();
 			}
-									
 
-			std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
-
-			std::cout << responseStr.c_str();
 			send(connection, responseStr.c_str(), responseStr.size(), 0);
 			close(connection);
+									
+			if (DEBUG)
+			{
+				std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
+				std::cout << raw_request << std::endl;
+				std::cout << "***************************************************************************" << std::endl << std::endl;
+				std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
+				std::cout << responseStr.c_str() << std::endl;
+				std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;				
+			}
 
-			std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;
+			
 			break;
 		}
 	}

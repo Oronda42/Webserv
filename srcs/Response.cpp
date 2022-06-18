@@ -93,11 +93,11 @@ std::string Response::createFileResponse(const std::string &filePath)
 
 
 	if (_code == 404)
-		fileToFind = "gang-bang/errors/404.html";
+		fileToFind = "resources/errors/404.html";
 	else if (_code == 403)
-		fileToFind = "gang-bang/errors/403.html";
+		fileToFind = "resources/errors/403.html";
 	else if (_code == 400)
-		fileToFind = "gang-bang/errors/400.html";
+		fileToFind = "resources/errors/400.html";
 	
 
 	std::cout << "server error pages count : " << _server.errorPages.size() << std::endl;
