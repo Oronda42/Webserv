@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <vector>
 #include <cstdio>
+#include <sys/select.h>
 #include "../includes/Request.hpp"
 #include "../includes/Response.hpp"
 #include "../includes/MimeParser.hpp"
@@ -18,7 +19,7 @@
 #define BUFFER_SIZE 4000
 #define PORT 8080
 #define NB_OF_CLIENTS 10
-#define DEBUG 1
+#define DEBUG 0
 
 #define ROOT "/index.html"
 
@@ -71,7 +72,16 @@ int main(int argc, char const *argv[])
 
 	const int trueFlag = 1;
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
-		 std::cout << "sockopt failed " << errno << std::endl;
+	{
+		std::cout << "sockopt failed " << errno << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (fcntl(sockfd, F_SETFL, O_NONBLOCK) < 0)
+	{
+		std::cout << "fcntl failed " << errno << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	// Listen to port 8080 on any address
 	sockaddr_in sockaddr;
@@ -95,11 +105,43 @@ int main(int argc, char const *argv[])
 	else
 		std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;
 
+	struct fd_set master_set;
+	struct timeval timeout;
 
+	timeout.tv_sec = 3;
+	timeout.tv_usec = 0;
+
+	FD_ZERO(&master_set); // clear / init empty set
+	int max_fd = sockfd;
+	FD_SET(sockfd, &master_set); // add fd to set
 
 	while (1)
 	{	
 		//int connection;
+
+		int fd_ready = select(max_fd + 1, &master_set, NULL, NULL, &timeout);
+		if (fd_ready == -1)
+		{
+			std::cout << "Error in select(). errno: " << errno << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		else if (fd_ready == 0)
+		{
+			std::cout << "select() timeout" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		else
+		{
+			std::cout << "select() returned " << fd_ready << std::endl;
+		}
+
+		if (!FD_ISSET(sockfd, &master_set))
+		{
+			std::cout << "FD not ready, exiting\n";
+			exit(EXIT_FAILURE);
+		}
+
+
 		int addrlen = sizeof(sockaddr);
 		int connection = accept(sockfd, (struct sockaddr*)&sockaddr, (socklen_t*) &addrlen);
 		if (connection < 0)
