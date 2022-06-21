@@ -128,6 +128,7 @@ int main(int argc, char const *argv[])
 				std::cout << "Failed to grab connection. errno: " << errno << std::endl;
 				exit(EXIT_FAILURE);
 			}
+			if (!(--ret_val)) continue;
 		}
 
 		/*		read request in all the clients open to read	*/
