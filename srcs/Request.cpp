@@ -11,6 +11,8 @@ Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
 	parseHeaderAndContent(rawRequest);
 }
 
+Request::Request() {}
+
 long Request::getContentLength() const { return _contentLength; }
 
 void Request::parseHeaderAndContent(const std::string &rawRequest)
