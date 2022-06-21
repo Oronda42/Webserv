@@ -26,6 +26,7 @@ class Request
 		void parseHeaderAndContent(const std::string &rawRequest);
 	
 	public:
+		Request();
 		Request(const std::string &rawRequest);
 		std::string  getUri() const;
 		std::string  getMethod() const;

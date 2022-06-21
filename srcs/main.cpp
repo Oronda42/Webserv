@@ -8,18 +8,17 @@
 #include <errno.h>
 #include <vector>
 #include <cstdio>
-#include <sys/select.h>
 #include "../includes/Request.hpp"
 #include "../includes/Response.hpp"
 #include "../includes/MimeParser.hpp"
 #include "../includes/HttpCodesParser.hpp"
 #include "../includes/ConfigParser.hpp"
+#include "../includes/Client.hpp"
 #include <poll.h>
 
 #define BUFFER_SIZE 4000
 #define PORT 8080
 #define NB_OF_CLIENTS 10
-#define DEBUG 0
 
 #define ROOT "/index.html"
 
@@ -72,16 +71,7 @@ int main(int argc, char const *argv[])
 
 	const int trueFlag = 1;
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
-	{
-		std::cout << "sockopt failed " << errno << std::endl;
-		exit(EXIT_FAILURE);
-	}
-
-	if (fcntl(sockfd, F_SETFL, O_NONBLOCK) < 0)
-	{
-		std::cout << "fcntl failed " << errno << std::endl;
-		exit(EXIT_FAILURE);
-	}
+		 std::cout << "sockopt failed " << errno << std::endl;
 
 	// Listen to port 8080 on any address
 	sockaddr_in sockaddr;
@@ -105,145 +95,120 @@ int main(int argc, char const *argv[])
 	else
 		std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;
 
-	struct fd_set master_set;
-	struct timeval timeout;
 
-	timeout.tv_sec = 3;
-	timeout.tv_usec = 0;
+	fd_set read_fd_set;
+	fd_set write_fd_set;
 
-	FD_ZERO(&master_set); // clear / init empty set
-	int max_fd = sockfd;
-	FD_SET(sockfd, &master_set); // add fd to set
+	std::vector<Client> clients;
+
+	int addrlen = sizeof(sockaddr);
 
 	while (1)
 	{	
-		//int connection;
+		// reset of fd_sets
+		FD_ZERO(&read_fd_set);
+		FD_ZERO(&write_fd_set);
 
-		int fd_ready = select(max_fd + 1, &master_set, NULL, NULL, &timeout);
-		if (fd_ready == -1)
-		{
-			std::cout << "Error in select(). errno: " << errno << std::endl;
-			exit(EXIT_FAILURE);
-		}
-		else if (fd_ready == 0)
-		{
-			std::cout << "select() timeout" << std::endl;
-			exit(EXIT_FAILURE);
-		}
-		else
-		{
-			std::cout << "select() returned " << fd_ready << std::endl;
+		// Set clients fd into fd_set
+		FD_SET(sockfd, &read_fd_set);
+		for (unsigned int i = 0; i < clients.size(); i++) {
+			if (!clients[i].is_ready)
+				FD_SET(clients[i].fd, &read_fd_set);
+			FD_SET(clients[i].fd, &write_fd_set);
 		}
 
-		if (!FD_ISSET(sockfd, &master_set))
-		{
-			std::cout << "FD not ready, exiting\n";
-			exit(EXIT_FAILURE);
+		int ret_val = select(FD_SETSIZE, &read_fd_set, &write_fd_set, NULL, NULL);
+
+		if (!ret_val) continue;
+
+		// sockfd set in read_fd_set mean there is a new connection
+		if (FD_ISSET(sockfd, &read_fd_set)) { 
+			clients.push_back(Client(accept(sockfd, (struct sockaddr*)&sockaddr, (socklen_t*) &addrlen))); // create client with the new fd
+			if (clients.back().fd < 0) {
+				std::cout << "Failed to grab connection. errno: " << errno << std::endl;
+				exit(EXIT_FAILURE);
+			}
 		}
 
-
-		int addrlen = sizeof(sockaddr);
-		int connection = accept(sockfd, (struct sockaddr*)&sockaddr, (socklen_t*) &addrlen);
-		if (connection < 0)
-		{
-			std::cout << "Failed to grab connection. errno: " << errno << std::endl;
-			exit(EXIT_FAILURE);
-		}
-
-		std::string raw_request;
-		while (1)
-		{
-			//std::cout << "accepting a connection from : "<< sockaddr.sin_addr.s_addr  << std::endl;
-			char buffer[BUFFER_SIZE] = {0};
-			int r = recv(connection, buffer, BUFFER_SIZE, 0);
-			if (r < 0)
-				std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
-			raw_request.append(buffer, r);
+		/*		read request in all the clients open to read	*/
+		for (unsigned int i = 0; i < clients.size(); i++) {
+			if (FD_ISSET(clients[i].fd, &read_fd_set)) {
+				if (!clients[i].header_recieved) {
+					char buffer[BUFFER_SIZE] = {0};
+					int r = recv(clients[i].fd, buffer, BUFFER_SIZE, 0);
+					if (r < 0)
+						std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
+					clients[i].raw_request.append(buffer, r);
 			
-			size_t foundPos;
-			if ((foundPos = raw_request.find("\r\n\r\n")) == std::string::npos)
-			{
-				//std::cout << "WAITING FOR ALL HEADER\n";			
-				continue;
-			}
+					size_t foundPos;
+					if ((foundPos = clients[i].raw_request.find("\r\n\r\n")) == std::string::npos)
+					{
+						//std::cout << "WAITING FOR ALL HEADER\n";			
+						continue;
+					}
 
-			std::cout << "Header fully received\n";
+					std::cout << "Header fully received\n";
 
-			break;
+					clients[i].read_content_bytes = (clients[i].raw_request.size() - foundPos) - 4;
+					clients[i].request = Request(clients[i].raw_request);
+					clients[i].header_recieved = 1;
+				}
+
+				if (clients[i].header_recieved)	{
+
+					if (clients[i].request.getContentLength() != -1 && clients[i].read_content_bytes < clients[i].request.getContentLength()
+							&& clients[i].request.getContentLength() <= servers[0].maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
+					{
+						char buffer[BUFFER_SIZE] = {0};
+						int r = recv(clients[i].fd, buffer, BUFFER_SIZE, 0);
+						if (r < 0)
+							std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
+						clients[i].raw_request.append(buffer, r);
+
+						//readContentBytes += r;
+						clients[i].read_content_bytes += r;
+						if (clients[i].read_content_bytes != clients[i].request.getContentLength())
+							continue;
+					}
+
+					std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
+
+					std::cout << clients[i].raw_request;
+
+					std::cout << "***************************************************************************" << std::endl << std::endl;
+
+					clients[i].request = Request(clients[i].raw_request);
+					clients[i].is_ready = 1;
+				}			
+			} // FD_ISSET(,read)
+
+			/*	write respone in all the clients open to write and ready (ready == requeste is complete) */
+			for (unsigned int i = 0; i < clients.size(); i++) {
+				if (clients[i].is_ready && FD_ISSET(clients[i].fd, &write_fd_set)) {
+
+					Response response(clients[i].request, servers[0]);
+
+					std::string responseStr;
+					if (clients[i].request.getContentLength() > servers[0].maxBodySize) {
+						std::cout << "Body too big :" << clients[i].request.getContentLength() << " bytes but the server only accepts " << servers[0].maxBodySize << " at most\n";
+						responseStr = response.generateResponse(413, "gang-bang/errors/413.html");
+					}
+					else {
+						responseStr = response.generateResponse();
+					}
+
+					std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
+
+					std::cout << responseStr.c_str();
+					send(clients[i].fd, responseStr.c_str(), responseStr.size(), 0);
+					close(clients[i].fd);
+					clients.erase(clients.begin() + i);
+
+					std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;
+				}
+			} // FD_ISSET(,write)
 		}
-
-		size_t foundPos = raw_request.find("\r\n\r\n");
-		int readContentBytes = (raw_request.size() - foundPos) - 4;
-		Request onlyHeaderRequest(raw_request);
-
-		while(1)
-		{
-			if (onlyHeaderRequest.getContentLength() != -1 && readContentBytes < onlyHeaderRequest.getContentLength() && onlyHeaderRequest.getContentLength() <= servers[0].maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
-			{
-				char buffer[BUFFER_SIZE] = {0};
-				int r = recv(connection, buffer, BUFFER_SIZE, 0);
-				if (r < 0)
-					std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
-				raw_request.append(buffer, r);
-
-				readContentBytes += r;
-				if (readContentBytes != onlyHeaderRequest.getContentLength())
-					continue;
-			}
-					
-
-			// std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
-
-			// std::cout << raw_request;
-
-			// std::cout << "***************************************************************************" << std::endl << std::endl;
-
-			//std::string request = test;
-			// if (request.empty())
-			// {
-			// 	std::cout << "request is empty" << buffer << std::endl;
-			// 	close(connection);
-			// 	continue;
-			// }
-			
-			Request request(raw_request);
-			Response response(request, servers[0]);
-			//std::string response = create_response(request);
-
-			std::string responseStr;
-			if (onlyHeaderRequest.getContentLength() > servers[0].maxBodySize && servers[0].maxBodySize != -1)
-			{
-				if (DEBUG)
-					std::cout << "Body too big :" << onlyHeaderRequest.getContentLength() << " bytes but the server only accepts " << servers[0].maxBodySize << " at most\n";
-					
-				// responseStr = response.generateResponse(404, "resources/errors/404.html");
-				responseStr = response.generateResponse(200, "gang-bang/www/index.html");
-			}
-			else
-			{
-				responseStr = response.generateResponse();
-			}
-
-			send(connection, responseStr.c_str(), responseStr.size(), 0);
-			close(connection);
-									
-			if (DEBUG)
-			{
-				std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
-				std::cout << raw_request << std::endl;
-				std::cout << "***************************************************************************" << std::endl << std::endl;
-				std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
-				std::cout << responseStr.c_str() << std::endl;
-				std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;				
-			}
-
-			
-			break;
-		}
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////
+	} // while(1)
 
 	close(sockfd);
 }
-
