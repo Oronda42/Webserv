@@ -119,6 +119,11 @@ int main(int argc, char const *argv[])
 
 		int ret_val = select(FD_SETSIZE, &read_fd_set, &write_fd_set, NULL, NULL);
 
+		if (ret_val < 0) {
+			std::cout << "Error with select. errno: " << errno << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
 		if (!ret_val) continue;
 
 		// sockfd set in read_fd_set mean there is a new connection
