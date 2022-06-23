@@ -197,7 +197,7 @@ int main(int argc, char const *argv[])
 					std::string responseStr;
 					if (clients[i].request.getContentLength() > servers[0].maxBodySize) {
 						std::cout << "Body too big :" << clients[i].request.getContentLength() << " bytes but the server only accepts " << servers[0].maxBodySize << " at most\n";
-						responseStr = response.generateResponse(413, "gang-bang/errors/413.html");
+						responseStr = response.generateResponse(413, "resources/errors/413.html");
 					}
 					else {
 						responseStr = response.generateResponse();
@@ -206,7 +206,8 @@ int main(int argc, char const *argv[])
 					std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
 
 					std::cout << responseStr.c_str();
-					send(clients[i].fd, responseStr.c_str(), responseStr.size(), 0);
+					if (!responseStr.empty()) 
+						send(clients[i].fd, responseStr.c_str(), responseStr.size(), 0);
 					FD_CLR(clients[i].fd, &write_fd_set);
 					FD_CLR(clients[i].fd, &read_fd_set);
 					close(clients[i].fd);
