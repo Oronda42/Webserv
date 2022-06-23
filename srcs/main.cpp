@@ -206,9 +206,9 @@ int main(int argc, char const *argv[])
 					std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
 
 					std::cout << responseStr.c_str();
+					send(clients[i].fd, responseStr.c_str(), responseStr.size(), 0);
 					FD_CLR(clients[i].fd, &write_fd_set);
 					FD_CLR(clients[i].fd, &read_fd_set);
-					send(clients[i].fd, responseStr.c_str(), responseStr.size(), 0);
 					close(clients[i].fd);
 					clients.erase(clients.begin() + i);
 
