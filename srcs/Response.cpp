@@ -22,7 +22,6 @@ std::vector<Server::Location> Response::getSortedMatchingLocations(const std::st
 	{
 		Server::Location location = *locationIte;
 		std::string locationPath = location.path;
-
 		if (filePath.find(locationPath) == 0)
 			sortedLocations.push_back(location);
 	}
@@ -132,8 +131,13 @@ std::string Response::generateResponse()
 {
 	std::cout << "++++++++++++++++++++++++++++  SERVER LOGS ++++++++++++++++++++++++++++" << std::endl;
 
+	if (_request.getUri().empty())	
+		return "";
 	std::string onlyFilePath = Utils::split(_request.getUri(), '?').at(0);
+	Utils::removeHostName(onlyFilePath);
 	Utils::removeLastSlash(onlyFilePath);
+	if (onlyFilePath.empty() || onlyFilePath.at(0) != '/')
+		onlyFilePath.insert(0, "/");
 	
 	Server::Location location = selectBestLocation(onlyFilePath);
 	if(!location.redirection.empty())
@@ -192,8 +196,6 @@ std::string Response::generateResponse(int code, const std::string &filePath)
 std::string Response::createRedirectResponse(std::string location)
 {
 	return createHeader(_request.getProtocol(), 301, location );
-	 
-	
 }
 
 std::string Response::constructResponse(const std::string &header, const std::string &content)
@@ -217,7 +219,7 @@ std::string Response::createResponseCodeStatus(const std::string &protocol, int 
 {
 	std::stringstream ss;
 
-	ss << protocol << ' ' << code << ' ' << httpCodesParser.httpCodesMap[code] << '\n';
+	ss << protocol << ' ' << code << ' ' << httpCodesParser.httpCodesMap[code] << "\r\n";
 	return ss.str();
 }
 
@@ -225,7 +227,7 @@ std::string Response::createReponseContentLength(int contentLength)
 {
 	std::stringstream ss;
 
-	ss << "Content-Length: " << contentLength << '\n';
+	ss << "Content-Length: " << contentLength << "\r\n";
 	return ss.str();
 }
 
@@ -233,7 +235,7 @@ std::string Response::createReponseContentType(const std::string &contentType)
 {
 	std::stringstream ss;
 
-	ss << "Content-Type: " << contentType << '\n';
+	ss << "Content-Type: " << contentType << "\r\n";
 	return ss.str();
 }
 
@@ -247,7 +249,7 @@ std::string Response::createHeader(const std::string &protocol,
 	ss << createResponseCodeStatus(protocol, code);
 	ss << createReponseContentType(contentType);
 	ss << createReponseContentLength(contentLength);
-	ss << std::endl;
+	ss << "\r\n";
 
 	return ss.str();
 }
@@ -257,8 +259,8 @@ std::string Response::createHeader(const std::string &protocol, int code, std::s
 	std::stringstream ss;
 
 	ss << createResponseCodeStatus(protocol, code);
-	ss << "Location: " << location << std::endl;
-	ss << std::endl;
+	ss << "Location: " << location << "\r\n";
+	ss << "\r\n";
 
 	return ss.str();
 }
