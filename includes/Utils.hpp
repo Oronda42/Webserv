@@ -123,6 +123,15 @@ class Utils
 			return "";
 		}
 
+		static std::string &removeHostName(std::string &filePath) {
+			if (filePath.find("http://") != filePath.npos)
+				filePath = filePath.substr(7);
+			size_t incr = filePath.find("/");
+			if (incr != filePath.npos)
+				filePath = filePath.substr(incr);
+			return filePath;	
+		}
+	
 		// bool isDirectory(struct stat &stats)
 		// {
 		// 	return (S_ISDIR(stats.st_mode));
