@@ -11,8 +11,8 @@ struct Client {
 	Request		request;
 	int			read_content_bytes;
 	int 		fd;
-	bool 		header_recieved;
 	bool 		is_ready;
+	bool 		header_received;
 };
 
 // (defined as a struct so the attributs are public)

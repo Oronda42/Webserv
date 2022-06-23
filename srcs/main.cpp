@@ -139,15 +139,15 @@ int main(int argc, char const *argv[])
 		/*		read request in all the clients open to read	*/
 		for (unsigned int i = 0; i < clients.size(); i++) {
 			if (FD_ISSET(clients[i].fd, &read_fd_set)) {
-				if (!clients[i].header_recieved) {
+				if (!clients[i].header_received) {
 					char buffer[BUFFER_SIZE] = {0};
 					int r = recv(clients[i].fd, buffer, BUFFER_SIZE, 0);
 					if (r < 0)
 						std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
 					clients[i].raw_request.append(buffer, r);
 			
-					size_t foundPos;
-					if ((foundPos = clients[i].raw_request.find("\r\n\r\n")) == std::string::npos)
+					size_t foundPos = clients[i].raw_request.find("\r\n\r\n");
+					if (foundPos == std::string::npos)
 					{
 						//std::cout << "WAITING FOR ALL HEADER\n";			
 						continue;
@@ -157,10 +157,10 @@ int main(int argc, char const *argv[])
 
 					clients[i].read_content_bytes = (clients[i].raw_request.size() - foundPos) - 4;
 					clients[i].request = Request(clients[i].raw_request);
-					clients[i].header_recieved = 1;
+					clients[i].header_received = true;
 				}
 
-				if (clients[i].header_recieved)	{
+				if (clients[i].header_received)	{
 
 					if (clients[i].request.getContentLength() != -1 && clients[i].read_content_bytes < clients[i].request.getContentLength()
 							&& clients[i].request.getContentLength() <= servers[0].maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
@@ -184,7 +184,7 @@ int main(int argc, char const *argv[])
 					std::cout << "***************************************************************************" << std::endl << std::endl;
 
 					clients[i].request = Request(clients[i].raw_request);
-					clients[i].is_ready = 1;
+					clients[i].is_ready = true;
 				}			
 			} // FD_ISSET(,read)
 

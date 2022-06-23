@@ -193,6 +193,10 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 			}
 			cgiList.push_back(cgi);
 		}
+		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
+		{
+			continue;
+		}
 		else
 		{
 			std::cerr << "Invalid line in location: '" << Utils::trim(line, " \n\t") << "'" << std::endl;
@@ -337,6 +341,10 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 			if (validateOneLocation(ifs, line) == false)
 				return false;
 		}
+		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
+		{
+			continue;
+		}
 		else
 		{
 			std::cerr << "Invalid line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
@@ -370,6 +378,10 @@ bool ConfigParser::validateConfigFile()
 		{
 			if (validateOneServer(ifs, line) == false)
 				return false;
+		}
+		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
+		{
+			continue;
 		}
 		else
 		{
@@ -496,6 +508,10 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 		else if (configValue == "upload_directory")
 		{
 			route.uploadDirectory = values.at(1);
+		}
+		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
+		{
+			continue;
 		}
 		else
 		{
