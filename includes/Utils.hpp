@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <time.h>
 
 #include "./Errors.hpp"
 
@@ -17,6 +18,20 @@ class Utils
 {
 	public:
 		std::string getFilePath(std::string &request);
+
+		static std::string getHttpDate()
+		{
+			time_t rawtime;
+			struct tm * timeinfo;
+			char buffer[80];
+
+			time(&rawtime);
+			timeinfo = gmtime(&rawtime);
+
+			strftime(buffer, 80, "Date: %a, %d %b %Y %H:%M:%S GMT", timeinfo);
+
+			return std::string(buffer);
+		}
 
 		static std::string get_first_line(const std::string &str)
 		{

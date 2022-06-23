@@ -249,6 +249,7 @@ std::string Response::createHeader(const std::string &protocol,
 	ss << createResponseCodeStatus(protocol, code);
 	ss << createReponseContentType(contentType);
 	ss << createReponseContentLength(contentLength);
+	ss << Utils::getHttpDate() << "\r\n";
 	ss << "\r\n";
 
 	return ss.str();
@@ -260,6 +261,7 @@ std::string Response::createHeader(const std::string &protocol, int code, std::s
 
 	ss << createResponseCodeStatus(protocol, code);
 	ss << "Location: " << location << "\r\n";
+	ss << Utils::getHttpDate() << "\r\n";
 	ss << "\r\n";
 
 	return ss.str();
