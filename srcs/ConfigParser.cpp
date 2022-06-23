@@ -505,6 +505,12 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 
 	}
 
+	if (route.acceptedHttpMethods.empty())
+	{
+		route.acceptedHttpMethods.push_back("GET");
+		route.acceptedHttpMethods.push_back("POST");
+	}
+
 	return route;
 }
 

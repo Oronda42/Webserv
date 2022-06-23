@@ -114,10 +114,10 @@ std::string Response::createFileResponse(const std::string &filePath)
 		}
 	}
 	
-		_content = Utils::getRawDocumentContent(fileToFind);
-		_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
+	_content = Utils::getRawDocumentContent(fileToFind);
+	_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
 
-	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());	
+	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());
 	
 	std::string extension = Utils::getFileExtension(fileToFind);
 	std::cout << "extension is " << extension << std::endl;
@@ -140,7 +140,35 @@ std::string Response::generateResponse()
 		onlyFilePath.insert(0, "/");
 	
 	Server::Location location = selectBestLocation(onlyFilePath);
-	if(!location.redirection.empty())
+
+	if (std::find(location.acceptedHttpMethods.begin(), location.acceptedHttpMethods.end(), _request.getMethod()) == location.acceptedHttpMethods.end())
+	{
+		std::cout << "Not allowed\n";
+
+		// Method not in accepted list
+		_code = 405;
+		_status = createResponseStatus(_code);
+
+		_content = Utils::getRawDocumentContent("resources/errors/405.html");
+		_contentType = mimeParser.mimeMap[Utils::getFileExtension("resources/errors/405.html")];
+
+		_header = createHeader(_request.getProtocol(), _code, "text/html", _content.length());
+		_header.erase(_header.length() - 4, 4); // remove header end
+		_header.append("\r\nAllow: ");
+
+		for (std::vector<std::string>::const_iterator acceptedHttpMethodsIte = location.acceptedHttpMethods.begin(); acceptedHttpMethodsIte != location.acceptedHttpMethods.end(); ++acceptedHttpMethodsIte)
+		{
+			_header.append(*acceptedHttpMethodsIte);
+			if (acceptedHttpMethodsIte != location.acceptedHttpMethods.end() - 1)
+				_header.append(", ");
+		}
+		_header.append("\r\n\r\n\r\n");
+		
+		
+		return constructResponse(_header, _content);
+	}
+	
+	if(!location.redirection.empty() && _code != 405)
 	{
 		return createRedirectResponse(location.redirection);
 	}
