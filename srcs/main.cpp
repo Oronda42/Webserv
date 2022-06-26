@@ -15,9 +15,9 @@
 #include "../includes/ConfigParser.hpp"
 #include "../includes/Client.hpp"
 #include <poll.h>
+#include <map>
 
 #define BUFFER_SIZE 4000
-#define PORT 8080
 #define NB_OF_CLIENTS 10
 
 #define ROOT "/index.html"
@@ -32,6 +32,8 @@ HttpCodesParser httpCodesParser(HTTP_CODES_FILE);
 int main(int argc, char const *argv[])
 {
 	std::vector<Server> servers;
+	std::map<int, Server> serversMap;
+
 	std::string configFile;
 	if (argc < 2)
 		configFile =  "./conf/webserv.conf";
@@ -57,10 +59,50 @@ int main(int argc, char const *argv[])
 	Server t = servers[0];
 	std::cout << "Server[0] locations " << t.routes.size() << ", error pages : " << t.errorPages.size() << std::endl;
 
+
+	// Create fd and bind to port for each server
+	for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
+	{
+		Server s = *it;
+
+		int fd = socket(AF_INET, SOCK_STREAM, 0);
+		if (fd == -1)
+		{
+			std::cerr << "Error creating socket for server on port " << s.port << std::endl;
+			continue;
+			// exit(EXIT_FAILURE);
+		}
+
+		const int trueFlag = 1;
+		// Allow multiple sockets on the same port (https://stackoverflow.com/questions/40576517/what-is-the-purpose-of-so-reuseaddr)
+		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
+			std::cerr << "sockopt failed " << errno << std::endl;
+
+
+		struct sockaddr_in server_addr;
+		server_addr.sin_family = AF_INET;
+		server_addr.sin_addr.s_addr = INADDR_ANY;
+		server_addr.sin_port = htons(s.port);
+
+		if (bind(fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
+		{
+			std::cerr << "Error binding socket to port " << s.port << std::endl;
+			continue;
+			// exit(EXIT_FAILURE);
+		}
+		if (listen(fd, NB_OF_CLIENTS) == -1)
+		{
+			std::cerr << "Error listening socket on port " << s.port << std::endl;
+			continue;
+			// exit(EXIT_FAILURE);
+		}
+		std::cout << "Server on port " << s.port << " created and listening" << std::endl;
+		serversMap[fd] = s;
+	}
 	
 	
 	// Create a socket (IPv4, TCP)
-	int sockfd = socket(AF_INET, SOCK_STREAM,0);
+	/*int sockfd = socket(AF_INET, SOCK_STREAM,0);
 	if (sockfd == -1) 
 	{
 		std::cout << "Failed to create socket. errno: " << errno << std::endl;
@@ -85,7 +127,7 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE);
 	}
 	else
-	std::cout << "Binding socket : "<<  sockfd << std::endl;
+		std::cout << "Binding socket : "<<  sockfd << std::endl;
 
 	if(listen(sockfd,NB_OF_CLIENTS) < 0)
 	{
@@ -93,8 +135,10 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE);
 	}
 	else
-		std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;
+		std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;*/
 
+	
+	int sockfd = serversMap.begin()->first;
 
 	fd_set read_fd_set;
 	fd_set write_fd_set;
@@ -126,9 +170,11 @@ int main(int argc, char const *argv[])
 
 		if (!ret_val) continue;
 
+		struct sockaddr_in client_addr;
+
 		// sockfd set in read_fd_set mean there is a new connection
 		if (FD_ISSET(sockfd, &read_fd_set)) { 
-			clients.push_back(Client(accept(sockfd, (struct sockaddr*)&sockaddr, (socklen_t*) &addrlen))); // create client with the new fd
+			clients.push_back(Client(accept(sockfd, (struct sockaddr*)&client_addr, (socklen_t*) &addrlen))); // create client with the new fd
 			if (clients.back().fd < 0) {
 				std::cout << "Failed to grab connection. errno: " << errno << std::endl;
 				exit(EXIT_FAILURE);
@@ -143,7 +189,7 @@ int main(int argc, char const *argv[])
 					char buffer[BUFFER_SIZE] = {0};
 					int r = recv(clients[i].fd, buffer, BUFFER_SIZE, 0);
 					if (r < 0)
-						std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
+						std::cout << "Nothing to read from client connection : " << ntohs(client_addr.sin_addr.s_addr)  << std::endl;
 					clients[i].raw_request.append(buffer, r);
 			
 					size_t foundPos = clients[i].raw_request.find("\r\n\r\n");
@@ -168,7 +214,7 @@ int main(int argc, char const *argv[])
 						char buffer[BUFFER_SIZE] = {0};
 						int r = recv(clients[i].fd, buffer, BUFFER_SIZE, 0);
 						if (r < 0)
-							std::cout << "Nothing to read from client connection : " << ntohs(sockaddr.sin_addr.s_addr)  << std::endl;
+							std::cout << "Nothing to read from client connection : " << ntohs(client_addr.sin_addr.s_addr)  << std::endl;
 						clients[i].raw_request.append(buffer, r);
 
 						//readContentBytes += r;
@@ -179,7 +225,7 @@ int main(int argc, char const *argv[])
 
 					std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
 
-					std::cout << clients[i].raw_request;
+					//std::cout << clients[i].raw_request;
 
 					std::cout << "***************************************************************************" << std::endl << std::endl;
 
