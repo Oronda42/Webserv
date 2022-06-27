@@ -29,10 +29,34 @@
  MimeParser mimeParser(MIME_MAP_FILE);
 HttpCodesParser httpCodesParser(HTTP_CODES_FILE);
 
+
+Server& findMatchingServer(std::vector<Server> &servers, const std::string &host, int port)
+{
+	for (std::vector<Server>::iterator serversIte = servers.begin(); serversIte != servers.end(); ++serversIte)
+	{
+		for (std::vector<std::string>::iterator serverNamesIte = serversIte->names.begin(); serverNamesIte != serversIte->names.end(); ++serverNamesIte)
+		{
+			std::string serverName = *serverNamesIte;
+
+			if (serverName == host && serversIte->port == port)
+				return *serversIte; // To return reference to the server
+		}
+	}
+
+	// Use default server for port if none was found (first one) (should always be one becuse if we receive request on X port it means there is at least 1 server on this port)
+	for (std::vector<Server>::iterator serversIte = servers.begin(); serversIte != servers.end(); ++serversIte)
+	{
+		if (serversIte->port == port)
+			return *serversIte; // To return reference to the server
+	}
+	throw (std::runtime_error("No server found for host: " + host + "(shohuld never happen btw)"));
+}
+
 int main(int argc, char const *argv[])
 {
 	std::vector<Server> servers;
 	std::map<int, Server> serversMap;
+	typedef std::map<int, Server>::iterator serversMapIt;
 
 	std::string configFile;
 	if (argc < 2)
@@ -55,10 +79,6 @@ int main(int argc, char const *argv[])
 		std::cerr << "Error in config file " << configFile << std::endl;
 		exit(EXIT_FAILURE);
 	}
-
-	Server t = servers[0];
-	std::cout << "Server[0] locations " << t.routes.size() << ", error pages : " << t.errorPages.size() << std::endl;
-
 
 	// Create fd and bind to port for each server
 	for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
@@ -153,8 +173,13 @@ int main(int argc, char const *argv[])
 		FD_ZERO(&read_fd_set);
 		FD_ZERO(&write_fd_set);
 
+		// Set servers fd into fd_set
+		for (serversMapIt it = serversMap.begin(); it != serversMap.end(); ++it)
+		{
+			FD_SET(it->first, &read_fd_set);
+		}
+
 		// Set clients fd into fd_set
-		FD_SET(sockfd, &read_fd_set);
 		for (unsigned int i = 0; i < clients.size(); i++) {
 			if (!clients[i].is_ready)
 				FD_SET(clients[i].fd, &read_fd_set);
@@ -173,15 +198,24 @@ int main(int argc, char const *argv[])
 		struct sockaddr_in client_addr;
 
 		// sockfd set in read_fd_set mean there is a new connection
-		if (FD_ISSET(sockfd, &read_fd_set)) { 
-			clients.push_back(Client(accept(sockfd, (struct sockaddr*)&client_addr, (socklen_t*) &addrlen))); // create client with the new fd
-			if (clients.back().fd < 0) {
-				std::cout << "Failed to grab connection. errno: " << errno << std::endl;
-				exit(EXIT_FAILURE);
+		// check for each server fd
+		for (serversMapIt it = serversMap.begin(); it != serversMap.end(); ++it)
+		{
+			int serverfd = it->first;
+			if (FD_ISSET(serverfd, &read_fd_set))
+			{ 
+				int client_fd = accept(serverfd, (struct sockaddr*)&client_addr, (socklen_t*) &addrlen);
+				if (client_fd == -1)
+				{
+					std::cout << "Failed to grab connection. errno: " << errno << std::endl;
+					continue;
+					// exit(EXIT_FAILURE);
+				}
+				clients.push_back(Client(client_fd)); // create client with the new fd
+				if (!(--ret_val)) continue;
 			}
-			if (!(--ret_val)) continue;
 		}
-
+		
 		/*		read request in all the clients open to read	*/
 		for (unsigned int i = 0; i < clients.size(); i++) {
 			if (FD_ISSET(clients[i].fd, &read_fd_set)) {
@@ -203,13 +237,15 @@ int main(int argc, char const *argv[])
 
 					clients[i].read_content_bytes = (clients[i].raw_request.size() - foundPos) - 4;
 					clients[i].request = Request(clients[i].raw_request);
+					std::cout << "Request sent to " << clients[i].request.getHost() << " on port " << clients[i].request.getPort() << std::endl;
 					clients[i].header_received = true;
 				}
 
 				if (clients[i].header_received)	{
+					Server server = findMatchingServer(servers, clients[i].request.getHost(), clients[i].request.getPort());
 
 					if (clients[i].request.getContentLength() != -1 && clients[i].read_content_bytes < clients[i].request.getContentLength()
-							&& clients[i].request.getContentLength() <= servers[0].maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
+						&& clients[i].request.getContentLength() <= server.maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
 					{
 						char buffer[BUFFER_SIZE] = {0};
 						int r = recv(clients[i].fd, buffer, BUFFER_SIZE, 0);
@@ -225,7 +261,7 @@ int main(int argc, char const *argv[])
 
 					std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
 
-					//std::cout << clients[i].raw_request;
+					std::cout << clients[i].raw_request;
 
 					std::cout << "***************************************************************************" << std::endl << std::endl;
 
@@ -238,12 +274,18 @@ int main(int argc, char const *argv[])
 			for (unsigned int i = 0; i < clients.size(); i++) {
 				if (clients[i].is_ready && FD_ISSET(clients[i].fd, &write_fd_set)) {
 
-					Response response(clients[i].request, servers[0]);
+					Server server = findMatchingServer(servers, clients[i].request.getHost(), clients[i].request.getPort());
+					Response response(clients[i].request, server);
 
 					std::string responseStr;
-					if (clients[i].request.getContentLength() > servers[0].maxBodySize) {
-						std::cout << "Body too big :" << clients[i].request.getContentLength() << " bytes but the server only accepts " << servers[0].maxBodySize << " at most\n";
+					if (clients[i].request.getContentLength() > server.maxBodySize) {
+						std::cout << "Body too big :" << clients[i].request.getContentLength() << " bytes but the server only accepts " << server.maxBodySize << " at most\n";
 						responseStr = response.generateResponse(413, "resources/errors/413.html");
+					}
+					else if (!clients[i].request.isValid())
+					{
+						std::cout << "Invalid request\n";
+						responseStr = response.generateResponse(400, "resources/errors/400.html");
 					}
 					else {
 						responseStr = response.generateResponse();

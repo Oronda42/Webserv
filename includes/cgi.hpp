@@ -16,9 +16,8 @@
 #define CGI_HPP
 #include <iostream>
 #include <unistd.h>
+
 #include "Utils.hpp"
-
-
 
 
 class CGI

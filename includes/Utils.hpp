@@ -12,8 +12,6 @@
 
 #include "./Errors.hpp"
 
-#define ROOT "/index.html"
-
 class Utils
 {
 	public:
@@ -49,7 +47,7 @@ class Utils
 			return false;
 		}
 
-		static std::string& trim(std::string &s, const std::string& charset)
+		static std::string& trim(std::string &s, const std::string& charset = " \r\t\n")
 		{
 			s.erase(0, s.find_first_not_of(charset));
 			s.erase(s.find_last_not_of(charset) + 1);

@@ -1,0 +1,31 @@
+html {
+	background-image: url(images/dsonpied.png);
+}
+
+a
+{
+	color: green;
+	
+}
+
+p
+{
+	color: purple;
+}
+
+.crackette {
+	color: blue;
+	display: inline-block;
+	float: left;
+}
+
+.rondelle {
+	color: teal;
+	display: inline-block;
+	float: left;
+}
+
+.under_image
+{
+	align-content: center;
+}
