@@ -237,12 +237,18 @@ int main(int argc, char const *argv[])
 
 					clients[i].read_content_bytes = (clients[i].raw_request.size() - foundPos) - 4;
 					clients[i].request = Request(clients[i].raw_request);
+<<<<<<< HEAD
 					std::cout << "Request sent to " << clients[i].request.getHost() << " on port " << clients[i].request.getPort() << std::endl;
+=======
+>>>>>>> 55102f3b67930ad98a632936023d04efde57a7d6
 					clients[i].header_received = true;
 				}
 
 				if (clients[i].header_received)	{
+<<<<<<< HEAD
 					Server server = findMatchingServer(servers, clients[i].request.getHost(), clients[i].request.getPort());
+=======
+>>>>>>> 55102f3b67930ad98a632936023d04efde57a7d6
 
 					if (clients[i].request.getContentLength() != -1 && clients[i].read_content_bytes < clients[i].request.getContentLength()
 						&& clients[i].request.getContentLength() <= server.maxBodySize) // Dont receeive if already read everything with one buffer (eg. small files)
