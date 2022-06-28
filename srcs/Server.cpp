@@ -10,7 +10,7 @@
 /*                                 `._;  `._;                   `-            */
 /* ************************************************************************** */
 
-#include "../includes/Server.hpp"
+#include "Server.hpp"
 
 Server::Server() : port(80), maxBodySize(1)
 {

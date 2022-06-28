@@ -1,14 +1,10 @@
-#include "../includes/ConfigParser.hpp"
+#include "ConfigParser.hpp"
 
-// ConfigParser::ConfigParser(const std::string &configFile, Config &config)
-// {
-// 	ParseConfig(configFile, config);
-// }
-
-// bool ConfigParser::ParseConfig(const std::string &configFile, Config &config) const
-// {
-
-// }
+#include <stack>
+#include <algorithm>
+#include <climits>
+#include <cstdlib>
+#include <iostream>
 
 ConfigParser::ConfigParser(const std::string &configFile) : _configFile(configFile)
 {
@@ -19,9 +15,7 @@ ConfigParser::ConfigParser(const std::string &configFile) : _configFile(configFi
 }
 
 ConfigParser::~ConfigParser()
-{
-	// std::cout << "destructor" << std::endl;
-}
+{ }
 
 bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &firstLine)
 {
@@ -396,8 +390,6 @@ bool ConfigParser::validateConfigFile()
 CGI ConfigParser::parseCgiLine(const std::string &line)
 {
 	CGI cgi;
-	cgi.execPath = "";
-	cgi.extension = "";
 
 	std::vector<std::string> values = Utils::split(line, " \t");
 	if (values.size() != 3)
@@ -409,25 +401,24 @@ CGI ConfigParser::parseCgiLine(const std::string &line)
 	if (extension.at(0) == '.')
 		extension.erase(0, 1);
 	
-	cgi.extension = extension;
-	cgi.execPath = path;
+	cgi.setExtension(extension);
+	cgi.setExecPath(path);
 
 	return cgi;
 }
 
-Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::string &path)
+Server::Location ConfigParser::parseOneLocation(std::ifstream &ifs, const std::string &path)
 {
 	std::string line;
-	Server::Location route;
+	Server::Location location;
 	
-	route.path = path;
+	location.path = path;
 
 	while (std::getline(ifs, line))
 	{
 		if (line.empty())
 			continue;
 		
-		//std::cout << "location line : " << Utils::trim(line, " \n\t") << std::endl;
 		std::vector<std::string> values = Utils::split(line, " \t");
 		
 		if (values.empty() || values.at(0) == "#")
@@ -440,74 +431,49 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 
 		if (configValue == "cgi")
 		{
-			// todo check size
-			//std::cout << "parsing cgi in route\n";
-			route.cgis.push_back(this->parseCgiLine(line));
+			location.cgis.push_back(this->parseCgiLine(line));
 		}
 		else if (configValue == "methods")
 		{
 			std::vector<std::string> methodsList;
 			methodsList.push_back("GET");
-			//methodsList.push_back("HEAD");
 			methodsList.push_back("POST");
-			//methodsList.push_back("PUT");
 			methodsList.push_back("DELETE");
-			// methodsList.push_back("CONNECT");
-			// methodsList.push_back("OPTIONS");
-			// methodsList.push_back("TRACE");
-			// methodsList.push_back("PATCH");
-
 			
-			// todo something if not right
 			for (std::vector<std::string>::iterator it = values.begin() + 1; it != values.end(); ++it)
 			{
 				std::string method = *it;
-				route.acceptedHttpMethods.push_back(method);
-				// if (std::find(methodsList.begin(), methodsList.end(), method) != methodsList.end())
-				// {
-				// }
-				// else
-				// {
-				// 	// todo
-				// 	std::cerr << "Method '" << method << "' invalid, :sadge:" << std::endl;
-				// 	//break;
-				// }
+				location.acceptedHttpMethods.push_back(method);
 			}
 		}
 		else if (configValue == "redirect")
 		{
-			// todo check length
-			route.redirection = values.at(1);
+			location.redirection = values.at(1);
 		}
 		else if (configValue == "root")
 		{
-			// todo check values error / length
-			route.rootPath = values.at(1);
+			location.rootPath = values.at(1);
 		}
 		else if (configValue == "directory_listing")
 		{
-			// todo check values error / length
 			std::string value = values.at(1);
 			if (value == "on" || value == "true")
 			{
-				route.directoryListing = true;
+				location.directoryListing = true;
 			}
 			else if (value == "off" || value == "false")
 			{
-				route.directoryListing = false;
+				location.directoryListing = false;
 			}
-			else
-			{
-				// error
-			}
+			// No else because we already checked for the valid values in validation
 		}
 		else if (configValue == "index")
 		{
-			route.defaultFile = values.at(1);
+			location.defaultFile = values.at(1);
 		}
 		else if (configValue == "upload_directory")
 		{
-			route.uploadDirectory = values.at(1);
+			location.uploadDirectory = values.at(1);
 		}
 		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
 		{
@@ -516,18 +482,18 @@ Server::Location ConfigParser::parseOneRoute(std::ifstream &ifs, const std::stri
 		else
 		{
 			std::cerr << "Invalid line in server: '" << Utils::trim(line, " \n\t") << "'" << std::endl;
-			return route;
+			return location;
 		}
 
 	}
 
-	if (route.acceptedHttpMethods.empty())
+	if (location.acceptedHttpMethods.empty())
 	{
-		route.acceptedHttpMethods.push_back("GET");
-		route.acceptedHttpMethods.push_back("POST");
+		location.acceptedHttpMethods.push_back("GET");
+		location.acceptedHttpMethods.push_back("POST");
 	}
 
-	return route;
+	return location;
 }
 
 // returns -1 on fail
@@ -583,7 +549,6 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 		if (line.empty())
 			continue;
 		
-		//std::cout << "server line : " << Utils::trim(line, " \n\t") << std::endl;
 		std::vector<std::string> values = Utils::split(line, " \t");
 
 		if (values.empty() || values.at(0) == "#")
@@ -608,7 +573,7 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 						break;
 				}
 			}
-			server.routes.push_back(this->parseOneRoute(ifs, values.at(1)));
+			server.locations.push_back(this->parseOneLocation(ifs, values.at(1)));
 		}
 		else if (configValue == "server_names")
 		{
@@ -667,41 +632,68 @@ std::vector<Server> ConfigParser::parseConfig()
 	}
 
 
+	#if DEBUG
 	for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
 	{
 		Server server = *it;
 
-		std::cout << "==== SERVER ====\n";
+		std::cout << "============ SERVER ============\n";
 		std::cout << "Port: " << server.port << "\n";
-		std::cout << "Names: ";
-		for (std::vector<std::string>::iterator it1 = server.names.begin(); it1 != server.names.end(); ++it1)
-			std::cout << *it1 << " ";
-		std::cout << "\nMax body size: " << server.maxBodySize << "\n";
+		
+		if (!server.names.empty())
+		{
+			std::cout << "Names: ";
+			for (std::vector<std::string>::iterator it1 = server.names.begin(); it1 != server.names.end(); ++it1)
+				std::cout << *it1 << " ";
+			std::cout << "\n";
+		}
+
+		if (server.maxBodySize == -1)
+			std::cout << "Max body size: unlimited\n";
+		else
+			std::cout << "Max body size: " << server.maxBodySize << " bytes (" << std::fixed << ((double) server.maxBodySize / 1000000.0) << "MB)\n";
+
 		for (std::map<int, std::string>::iterator it1 = server.errorPages.begin(); it1 != server.errorPages.end(); ++it1)
 			std::cout << "Error " << it1->first << " page: " << it1->second << std::endl;
 	
-		for (std::vector<Server::Location>::iterator it1 = server.routes.begin(); it1 != server.routes.end(); ++it1)
+		for (std::vector<Server::Location>::iterator it1 = server.locations.begin(); it1 != server.locations.end(); ++it1)
 		{
-			Server::Location route = *it1;
+			Server::Location location = *it1;
+			std::cout << "\n--- Location " << location.path << " ---\n";
 
-			std::cout << "--- Route " << route.path << " ---\n";
 			std::cout << "Accepted methods: [";
-			for (std::vector<std::string>::iterator it2 = route.acceptedHttpMethods.begin(); it2 != route.acceptedHttpMethods.end(); ++it2)
-				std::cout << *it2 << ", ";
-			std::cout << "]\nRoot path: " << route.rootPath << "\n";
-			std::cout << "Directory listing " << (route.directoryListing ? "enabled" : "disabled") << "\n";
-			std::cout << "Default file: " << route.defaultFile << "\n";
+			for (std::vector<std::string>::iterator it2 = location.acceptedHttpMethods.begin(); it2 != location.acceptedHttpMethods.end(); ++it2)
+			{
+				if (it2 != location.acceptedHttpMethods.end() - 1)
+					std::cout << *it2 << ", ";
+				else
+					std::cout << "]\n";
+			}
+			
+			std::cout << "Root path: " << location.rootPath << "\n";
+			std::cout << "Directory listing " << (location.directoryListing ? "enabled" : "disabled") << "\n";
+			std::cout << "Default file: " << (location.defaultFile.empty() ? "None" : location.defaultFile) << "\n";
 			std::cout << "CGIS: ";
-			for (std::vector<CGI>::iterator it2 = route.cgis.begin(); it2 != route.cgis.end(); ++it2)
+			if (location.cgis.empty())
+				std::cout << "None\n";
+			else
+				std::cout << "{ ";
+
+			for (std::vector<CGI>::iterator it2 = location.cgis.begin(); it2 != location.cgis.end(); ++it2)
 			{
 				CGI cgi = *it2;
-				std::cout << "[" << cgi.extension << " : " << cgi.execPath << "] ";
+				std::cout << "[" << cgi.getExtension() << " : " << cgi.getExecPath();
+				if (it2 != location.cgis.end() - 1)
+					std::cout << "], ";
+				else
+					std::cout << "] }\n";
 			}
-			std::cout << "\nRedirection: " << route.redirection;
-			std::cout << "\n==== END SERVER ====" << std::endl;
+
+			std::cout << "Redirection: " << (location.redirection.empty() ? "None" : location.redirection) << "\n";
 		}
-	
+		std::cout << "============ END SERVER ============\n\n" << std::endl;
 	}
+	#endif
 
 	ifs.close();
 	return servers;

@@ -8,12 +8,10 @@
 #include <errno.h>
 #include <vector>
 #include <cstdio>
-#include "../includes/Request.hpp"
-#include "../includes/Response.hpp"
-#include "../includes/MimeParser.hpp"
-#include "../includes/HttpCodesParser.hpp"
-#include "../includes/ConfigParser.hpp"
-#include "../includes/Client.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
+#include "ConfigParser.hpp"
+#include "Client.hpp"
 #include <poll.h>
 #include <map>
 
@@ -24,11 +22,6 @@
 
 #define DOCUMENT 0
 #define IMAGE 1
-
-// Only need 1 mimeParser and 1 httpCodesParser
- MimeParser mimeParser(MIME_MAP_FILE);
-HttpCodesParser httpCodesParser(HTTP_CODES_FILE);
-
 
 Server& findMatchingServer(std::vector<Server> &servers, const std::string &host, int port)
 {

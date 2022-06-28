@@ -5,7 +5,12 @@ OBJS = $(SRCS:.cpp=.o)
 
 NAME = belloServ
 
-CC = g++ -I$(INCLUDES) -Wall -Wextra -Werror -std=c++98 -g
+CC = g++
+
+CFLAGS = -I$(INCLUDES) -Wall -Wextra -Werror -std=c++98
+ifdef DEBUG
+	CFLAGS += -g -DDEBUG=true
+endif
 
 SHELL = zsh
 
@@ -23,21 +28,28 @@ RED = \033[0;91m
 IRED = \033[0;31m
 RED_BOLD = \033[1;91m
 
+YELLOW = \033[0;33m
+
 SAME_LINE = \033[0G\033[2K
 
 RESET = \033[0m
 
 %.o: %.cpp
-	@$(CC) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 	@echo -n "$(SAME_LINE)$(AQUA)Compiling $(AQUA_BOLD)$< $(RESET)"
 
 $(NAME):	$(OBJS)
 	@echo
-	@echo "$(PURPLE)Linking $(PURPLE)*.o into $(PURPLE_BOLD)$(NAME)$(RESET)"
-	@$(CC) $(OBJS) -o $(NAME)
+	@echo "$(PURPLE)Linking *.o into $(PURPLE_BOLD)$(NAME)$(RESET)"
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 	@echo "$(GREEN_BOLD)Done compiling $(GREEN_UNDERLINE)$(NAME)"
 
 all:		$(NAME)
+
+debug: fclean
+	@echo "$(YELLOW)Enabling debug mode$(RESET)"
+	@$(MAKE) DEBUG=1 --no-print-directory
+
 
 clean:
 	@rm -f $(OBJS)
@@ -50,47 +62,3 @@ fclean:		clean
 re:			fclean all
 
 .PHONY:	all clean fclean re
-
-# CXX       = g++
-# CXX_FLAGS = -g -std=c++98 
-
-
-# SRC     = src
-# INCLUDE = include
-
-# EXECUTABLE  = belloServ
-
-
-# all: $(EXECUTABLE)
-
-# run: clean all
-# 	clear
-# 	./$(EXECUTABLE)
-
-# $(EXECUTABLE): $(SRC)/*.cpp
-# 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
-
-# clean:
-# 	-rm $(EXECUTABLE)
-
-# SRC = srcs/main.cpp srcs/MimeParser.cpp srcs/Request.cpp srcs/Response.cpp srcs/ConfigParser.cpp srcs/HttpCodesParser.cpp
-
-# CC = g++
-# CFLAGS =  -std=c++98 -Iinclude/#-fsanitize=address #-Wall -Werror -Wextra
-# NAME = belloServ
-# OBJS = ${SRC:.cpp=.o}
-# INCLUDE = include
-
-# ${NAME} : ${OBJS}
-# 	${CC} ${CFLAGS} ${OBJS} -o ${NAME}
-
-# %.o:%.cpp
-# 	$(CC) $(CFLAGS) -c $< -o $@
-# clean :
-# 	rm -rf ${OBJS}
-
-# fclean : clean
-# 	rm ${NAME}
-
-# re : fclean ${NAME}
-

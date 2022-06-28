@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-#include "cgi.hpp" 
+#include "Cgi.hpp" 
 
 class Server 
 {
@@ -28,7 +28,7 @@ class Server
 
 
 	public:
-		std::vector<Location> routes;
+		std::vector<Location> locations;
 		std::vector<std::string> names;
 		unsigned short port;
 		long maxBodySize;

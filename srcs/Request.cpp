@@ -1,4 +1,6 @@
-#include "../includes/Request.hpp" 
+#include "Request.hpp" 
+
+#include <cstdlib>
 
 Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
 {	

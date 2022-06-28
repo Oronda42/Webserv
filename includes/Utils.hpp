@@ -9,8 +9,9 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <time.h>
+#include <iostream>
 
-#include "./Errors.hpp"
+#include "Errors.hpp"
 
 class Utils
 {

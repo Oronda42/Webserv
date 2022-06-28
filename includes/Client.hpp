@@ -1,9 +1,13 @@
-#pragma once
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
-#include <iostream>
-#include "../includes/Request.hpp"
+#include "Request.hpp"
 
-struct Client {
+#include <string>
+
+struct Client
+{
+	Client();
 	Client(int connection);
 	~Client();
 
@@ -15,4 +19,4 @@ struct Client {
 	bool 		header_received;
 };
 
-// (defined as a struct so the attributs are public)
+#endif

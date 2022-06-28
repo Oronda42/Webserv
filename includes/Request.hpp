@@ -2,9 +2,9 @@
 # define REQUEST_HPP
 
 #include <iostream>
-#include "./Utils.hpp"
-#include "./MimeParser.hpp"
-#include <stdlib.h>
+
+#include "Utils.hpp"
+#include "MimeParser.hpp"
 
 
 class Request
@@ -27,7 +27,6 @@ class Request
 
 		void parseHeaderAndContent(const std::string &rawRequest);
 		void parseHostAndPort();
-
 	
 	public:
 		Request();

@@ -1,4 +1,4 @@
-#include "../includes/Response.hpp"
+#include "Response.hpp"
 #include <algorithm>
 
 Response::Response(const Request &request, const Server &server) : _request(request) , _server(server), _protocol(_request.getProtocol())
@@ -18,7 +18,7 @@ std::vector<Server::Location> Response::getSortedMatchingLocations(const std::st
 {
 	std::vector<Server::Location> sortedLocations;
 
-	for (std::vector<Server::Location>::const_iterator locationIte = _server.routes.begin(); locationIte != _server.routes.end(); ++locationIte)
+	for (std::vector<Server::Location>::const_iterator locationIte = _server.locations.begin(); locationIte != _server.locations.end(); ++locationIte)
 	{
 		Server::Location location = *locationIte;
 		std::string locationPath = location.path;
@@ -83,7 +83,7 @@ std::string Response::createFileResponse(const std::string &filePath)
 			_code = createDeleteResponseCode(succcess);
 			_status = createResponseStatus(_code);
 			_content = Utils::getRawDocumentContent("resources/delete.html");
-			_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
+			_contentType = MimeParser::mimeMap[Utils::getFileExtension(fileToFind)];
 		}
 		return createHeader(_content, _code, _contentType, _content.length());
 	}
@@ -115,13 +115,13 @@ std::string Response::createFileResponse(const std::string &filePath)
 	}
 	
 	_content = Utils::getRawDocumentContent(fileToFind);
-	_contentType = mimeParser.mimeMap[Utils::getFileExtension(fileToFind)];
+	_contentType = MimeParser::mimeMap[Utils::getFileExtension(fileToFind)];
 
 	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());
 	
 	std::string extension = Utils::getFileExtension(fileToFind);
 	std::cout << "extension is " << extension << std::endl;
-	std::cout << "associated type is " << mimeParser.mimeMap.size() << ", "<< mimeParser.mimeMap.at(extension) << std::endl;
+	std::cout << "associated type is " << MimeParser::mimeMap.size() << ", "<< MimeParser::mimeMap.at(extension) << std::endl;
 
 	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	return constructResponse(_header, _content);
@@ -150,7 +150,7 @@ std::string Response::generateResponse()
 		_status = createResponseStatus(_code);
 
 		_content = Utils::getRawDocumentContent("resources/errors/405.html");
-		_contentType = mimeParser.mimeMap[Utils::getFileExtension("resources/errors/405.html")];
+		_contentType = MimeParser::mimeMap[Utils::getFileExtension("resources/errors/405.html")];
 
 		_header = createHeader(_request.getProtocol(), _code, "text/html", _content.length());
 		_header.erase(_header.length() - 4, 4); // remove header end
@@ -202,7 +202,7 @@ std::string Response::generateResponse()
 
 	for (std::vector<CGI>::const_iterator cgiIte = location.cgis.begin(); cgiIte != location.cgis.end(); ++cgiIte)
 	{
-		if (fileExtension == cgiIte->extension)
+		if (fileExtension == cgiIte->getExtension())
 		{
 			return createCgiResponse(*cgiIte, location.uploadDirectory);
 		}
@@ -216,7 +216,7 @@ std::string Response::generateResponse(int code, const std::string &filePath)
 	_code = code;
 	_status = createResponseStatus(_code);
 	_content = Utils::getRawDocumentContent(filePath);
-	_contentType = mimeParser.mimeMap[Utils::getFileExtension(filePath)];
+	_contentType = MimeParser::mimeMap[Utils::getFileExtension(filePath)];
 	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());
 	return constructResponse(_header, _content);
 }
@@ -236,18 +236,12 @@ std::string Response::constructResponse(const std::string &header, const std::st
 	return ss.str();
 }
 
-// std::string Response::constructResponse(const std::string &header)
-// {
-// 	std::stringstream ss;
-// 	ss << header;
-// 	return ss.str();
-// }
 
 std::string Response::createResponseCodeStatus(const std::string &protocol, int code)
 {
 	std::stringstream ss;
 
-	ss << protocol << ' ' << code << ' ' << httpCodesParser.httpCodesMap[code] << "\r\n";
+	ss << protocol << ' ' << code << ' ' << HttpCodesParser::httpCodesMap[code] << "\r\n";
 	return ss.str();
 }
 
@@ -311,6 +305,6 @@ int Response::createResponseCode(const std::string &filePath)
 }
 
 std::string Response::createResponseStatus(int code)
-{
-	return httpCodesParser.httpCodesMap[code];
+{	
+	return HttpCodesParser::httpCodesMap[code];
 }

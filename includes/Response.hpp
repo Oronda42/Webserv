@@ -3,11 +3,11 @@
 
 #include <iostream>
 #include <sstream>
-//#include <ifstream>
-#include "./Request.hpp"
-#include "./Utils.hpp"
-#include "./HttpCodesParser.hpp"
-#include "./Server.hpp"
+
+#include "Request.hpp"
+#include "Utils.hpp"
+#include "HttpCodesParser.hpp"
+#include "Server.hpp"
 
 class Response
 {

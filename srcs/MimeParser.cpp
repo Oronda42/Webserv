@@ -1,23 +1,12 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   MimeParser.cpp                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: oronda <oronda@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 10-06-2022 16:42 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
-/*                                                                            */
-/* ************************************************************************** */
+#include "MimeParser.hpp"
 
-#include "../includes/MimeParser.hpp"
-
-void MimeParser::parseMimeFile(const std::string &mimeFile)
+MimeParser::mimeMap_t MimeParser::parseMimeFile(const std::string &mimeFile)
 {
 	std::ifstream ifs(mimeFile.c_str(), std::ios::binary);
 	std::string   line;
 
-	
+	MimeParser::mimeMap_t mimeMap;
+
 	if (!ifs.is_open())
 		throw FileNotFoundException();
 
@@ -35,36 +24,37 @@ void MimeParser::parseMimeFile(const std::string &mimeFile)
 
 		// From first space to ending ';' both excluded, then split on space for all extensions with same type
 		std::string extensionsStr = line.substr(line.find_first_of(' ') + 1);
-		//extensionsStr.pop_back(); // Remove ';' at the end
 		extensionsStr.erase(extensionsStr.length() - 1);
 		std::vector<std::string> extensionsVec = Utils::split(extensionsStr, ' ');
 
 		for (std::vector<std::string>::const_iterator it = extensionsVec.begin(); it != extensionsVec.end(); ++it)
 		{
 			std::string extension = *it;
-			//std::cout << "Extension '" << extension << "' has content-type '" << contentType << "'" << std::endl;
-			this->mimeMap[extension] = contentType;
+			mimeMap[extension] = contentType;
 		}
 	}
-	//std::cout << "Found " << this->mimeMap.size() << " extensions\n";
 	ifs.close();
+
+	#if DEBUG
+	std::cout << "MIME Types: [";
+	for (MimeParser::mimeMap_t::const_iterator it = mimeMap.begin(); it != mimeMap.end(); ++it)
+	{
+		std::cout << it->first << ":'" << it->second << "']";
+		if (it != --mimeMap.end())
+			std::cout << ", [";
+		else
+			std::cout << "]";
+	}
+	std::cout << "}\n" << std::endl;
+	#endif
+
+	return mimeMap;
 }
 
 MimeParser::MimeParser(const std::string &mimeFile)
 {
-	this->parseMimeFile(mimeFile);
+	if (mimeMap.empty())
+		this->parseMimeFile(mimeFile);
 }
 
-
-// int main()
-// {
-// 	try
-// 	{
-// 		MimeParser pouet("mime.txt");
-
-// 	}
-// 	catch (std::exception &e)
-// 	{
-// 		std::cerr << "Exception caught: " << e.what() << std::endl;
-// 	}
-// }
+MimeParser::mimeMap_t MimeParser::mimeMap = MimeParser::parseMimeFile(MIME_MAP_FILE);

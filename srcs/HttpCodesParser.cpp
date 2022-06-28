@@ -1,21 +1,11 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpCodeParser.cpp                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: oronda <oronda@student.42nice.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/05/20 00:00:00 by ' \/ (   )/       #+#    #+#             */
-/*   Updated: 10-06-2022 16:42 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
-/*                                                                            */
-/* ************************************************************************** */
+#include "HttpCodesParser.hpp"
 
-#include "../includes/HttpCodesParser.hpp"
-
-void HttpCodesParser::parseHttpCodesFile(const std::string &httpCodesFile)
+HttpCodesParser::httpCodesMap_t HttpCodesParser::parseHttpCodesFile(const std::string &httpCodesFile)
 {
 	std::ifstream ifs(httpCodesFile.c_str(), std::ios::binary);
 	std::string   line;
+
+	HttpCodesParser::httpCodesMap_t httpCodesMap;
 	
 	if (!ifs.is_open())
 		throw FileNotFoundException();
@@ -27,7 +17,7 @@ void HttpCodesParser::parseHttpCodesFile(const std::string &httpCodesFile)
 			continue;
 		
 		std::string description = line.substr(0, line.find_last_of(' '));
-		description = description.substr(0, description.find_last_not_of(' ') + 1); // Trim ending spaces (but not last character so +1)
+		description = description.substr(0, description.find_last_not_of(" \t") + 1); // Trim ending spaces (but not last character so +1)
 
 		if (line.find_first_of(';') == line.npos)
 			throw InvalidFileException();
@@ -42,13 +32,30 @@ void HttpCodesParser::parseHttpCodesFile(const std::string &httpCodesFile)
 				throw std::runtime_error("Invalid http code");
 		}
 		int httpCode = std::atoi(httpCodeStr.c_str());
-		this->httpCodesMap[httpCode] = description;
-
+		httpCodesMap[httpCode] = description;
 	}
 	ifs.close();
+
+	#if DEBUG
+	std::cout << "HTTP Codes: [";
+	for (HttpCodesParser::httpCodesMap_t::const_iterator it = httpCodesMap.begin(); it != httpCodesMap.end(); ++it)
+	{
+		std::cout << it->first << ":'" << it->second << "']";
+		if (it != --httpCodesMap.end())
+			std::cout << ", [";
+		else
+			std::cout << "]";
+	}
+	std::cout << "}\n" << std::endl;
+	#endif
+
+	return (httpCodesMap);
 }
 
 HttpCodesParser::HttpCodesParser(const std::string &httpCodesFile)
 {
-	this->parseHttpCodesFile(httpCodesFile);
+	if (httpCodesMap.empty())
+		this->parseHttpCodesFile(httpCodesFile);
 }
+
+HttpCodesParser::httpCodesMap_t HttpCodesParser::httpCodesMap = HttpCodesParser::parseHttpCodesFile(HTTP_CODES_FILE);
