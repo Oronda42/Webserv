@@ -53,8 +53,6 @@ std::string CGI::executeCGI(char **argv, char **env, const std::string &content)
 	}
 	else
 	{
-		std::string res = "";
-
 		close(fd_out[1]);
 
 		if (!content.empty())

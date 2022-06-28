@@ -1,6 +1,7 @@
-
 #ifndef UTILS_HPP
-# define UTILS_HPP
+#define UTILS_HPP
+
+#include "Errors.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -10,8 +11,7 @@
 #include <dirent.h>
 #include <time.h>
 #include <iostream>
-
-#include "Errors.hpp"
+#include <sstream>
 
 class Utils
 {
@@ -104,9 +104,10 @@ class Utils
 
 		static std::string getRawDocumentContent(const std::string &file_path)
 		{
-			
-			std::cout << "Getting file : " << file_path << std::endl;
-			//file_path.erase(0,1);
+			#if DEBUG
+			std::cout << "Getting file " << file_path << " contents\n";
+			#endif
+
 			std::ifstream     ifs(file_path.c_str(), std::ios::binary);
 			std::string       line;
 			std::string       fileContent;
@@ -145,31 +146,6 @@ class Utils
 				filePath = filePath.substr(incr);
 			return filePath;	
 		}
-	
-		// bool isDirectory(struct stat &stats)
-		// {
-		// 	return (S_ISDIR(stats.st_mode));
-		// }
-
-		// bool canReadFile(std::string& filePath)
-		// {
-		// 	FILE *fp = fopen("results.txt", "w");
-		// 	if (fp != NULL)
-		// 		return true;
-		// 	if (errno == EACCES)
-		// 		cerr << "Permission denied" << endl;
-		// 	return false;
-		// }
-
-		// bool canOpenFile(std::string& filePath)
-		// {
-		// 	FILE *fp = fopen("results.txt", "w");
-		// 	if (fp != NULL)
-		// 		return true;
-		// 	if (errno == EACCES)
-
-		// 	return false;
-		// }
 
 		static void removeFirstSlash(std::string& str)
 		{
@@ -189,33 +165,38 @@ class Utils
 				str.append("/");
 		}
 
-		static std::string directoryToHtml(std::string &dirPath)
+		static std::string directoryToHtml(const std::string &dirPath, const std::string &requestedFilePath)
 		{
-			Utils::addLastSlash(dirPath);
+			std::string requestedFileWithoutSlash = requestedFilePath;
+			Utils::removeLastSlash(requestedFileWithoutSlash);
+
+			std::string directoryPath = dirPath;
+			Utils::addLastSlash(directoryPath);
 
 			std::stringstream ss;
-			ss << "<!DOCTYPE html>\n<html>\n<head>\n<title>Index of " << dirPath << "</title></head><body>\n";
+			ss << "<!DOCTYPE html>\n<html>\n<head>\n<title>Index of " << directoryPath << "</title></head><body>\n";
 			DIR *dir;
 			struct dirent *ent;
-			if ((dir = opendir(dirPath.c_str())) != NULL)
+			if ((dir = opendir(directoryPath.c_str())) != NULL)
 			{
 				int filesFound = 0;
 				while ((ent = readdir(dir)) != NULL)
 				{
 					filesFound++;
 					std::string file_name = ent->d_name;
-					std::string file_path = dirPath + file_name;
+					std::string file_path = directoryPath + file_name;
+					std::string relativeFilePath = requestedFileWithoutSlash + "/" + file_name;
 					struct stat stats;
-					std::cout << "File found " << file_path << std::endl;
+					
 					if (stat(file_path.c_str(), &stats) == 0)
 					{
 						if (S_ISDIR(stats.st_mode))
 						{
-							ss << "<a href=\"" << file_path << "/\">" << file_name << "/</a><br>\n";
+							ss << "<a href=\"" << relativeFilePath << "/\">" << file_name << "/</a><br>\n";
 						}
 						else
 						{
-							ss << "<a href=\"" << file_path << "\">" << file_name << "</a><br>\n";
+							ss << "<a href=\"" << relativeFilePath << "\">" << file_name << "</a><br>\n";
 						}
 					}
 				}
@@ -224,7 +205,7 @@ class Utils
 			}
 			else
 			{
-				ss << "<p> Could not open directory " << dirPath << "</p>\n";
+				ss << "<p> Could not open directory " << directoryPath << "</p>\n";
 			}
 			ss << "</body>\n</html>\n";
 			

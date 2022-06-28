@@ -35,20 +35,34 @@ MimeParser::mimeMap_t MimeParser::parseMimeFile(const std::string &mimeFile)
 	}
 	ifs.close();
 
-	#if DEBUG
-	std::cout << "MIME Types: [";
-	for (MimeParser::mimeMap_t::const_iterator it = mimeMap.begin(); it != mimeMap.end(); ++it)
-	{
-		std::cout << it->first << ":'" << it->second << "']";
-		if (it != --mimeMap.end())
-			std::cout << ", [";
-		else
-			std::cout << "]";
-	}
-	std::cout << "}\n" << std::endl;
-	#endif
+	// #if DEBUG
+	// std::cout << "MIME Types: [";
+	// for (MimeParser::mimeMap_t::const_iterator it = mimeMap.begin(); it != mimeMap.end(); ++it)
+	// {
+	// 	std::cout << it->first << ":'" << it->second << "']";
+	// 	if (it != --mimeMap.end())
+	// 		std::cout << ", [";
+	// 	else
+	// 		std::cout << "]";
+	// }
+	// std::cout << "}\n" << std::endl;
+	// #endif
 
 	return mimeMap;
+}
+
+std::string MimeParser::getAssociatedType(const std::string &extension)
+{
+	std::string mime;
+	try
+	{
+		mime = mimeMap.at(extension);
+	}
+	catch (std::out_of_range &e)
+	{
+		mime = "text/plain";
+	}
+	return mime;
 }
 
 MimeParser::MimeParser(const std::string &mimeFile)

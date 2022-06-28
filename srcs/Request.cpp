@@ -7,7 +7,7 @@ Request::Request(const std::string &rawRequest) : _rawRequest(rawRequest)
 	std::string first_line = Utils::get_first_line(_rawRequest);
 	std::vector<std::string> splited_fl = Utils::split(first_line, ' ');
 
-	if (splited_fl.size() < 3)
+	if (splited_fl.size() != 3)
 	{
 		_method = "";
 		_uri = "";

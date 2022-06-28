@@ -1,4 +1,0 @@
-HEAD <PATH> HTTP/1.1
-Host: <HOSTPORT>
-Connection: keep-alive
-

@@ -16,11 +16,12 @@
 class HttpCodesParser
 {
 	public:
+		static std::string getAssociatedStatus(int code);
+
+	private:
 		typedef std::map<int, std::string> httpCodesMap_t;
 		static httpCodesMap_t httpCodesMap;
 
-
-	private:
 		HttpCodesParser();
 		HttpCodesParser(const std::string& httpCodesFile);
 

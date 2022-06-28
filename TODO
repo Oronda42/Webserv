@@ -1,13 +1,1 @@
-Poll (check https://www.ibm.com/docs/en/i/7.1?topic=designs-using-poll-instead-select)
-Config checker
-faire un beau site avec maxim
-Faire un beau directory listing
-faire des belles erreurs
 faire un beau site
-beau oronda
-faire en sorte que ca marche pas la config sans root
-client body size
-multiple servers and ports
-
-https://man7.org/linux/man-pages/man2/select.2.html
-https://www.ibm.com/docs/en/i/7.1?topic=designs-example-nonblocking-io-select

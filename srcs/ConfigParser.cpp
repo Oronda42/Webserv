@@ -33,7 +33,7 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 	{
 		while (std::getline(ifs, line))
 		{
-			std::string trimmedLine = Utils::trim(line, " \n\t");
+			std::string trimmedLine = Utils::trim(line);
 			if (trimmedLine.empty() || trimmedLine.at(0) == '#')
 				continue;
 			else if (trimmedLine != "{")
@@ -94,7 +94,7 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 		{
 			if (acceptedMethodsFound)
 			{
-				std::cerr << "Duplicate accepted methods on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate accepted methods on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			std::vector<std::string> methodsList;
@@ -117,7 +117,7 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 		{
 			if (redirectionFound)
 			{
-				std::cerr << "Duplicate redirect on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate redirect on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			redirectionFound = true;
@@ -126,7 +126,7 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 		{
 			if (rootFound)
 			{
-				std::cerr << "Duplicate root on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate root on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			rootFound = true;
@@ -135,13 +135,13 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 		{
 			if (directoryListingFound)
 			{
-				std::cerr << "Duplicate directory listing on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate directory listing on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			std::string value = tokens.at(1);
 			if (value != "on" && value != "true" && value != "off" && value != "false")
 			{
-				std::cerr << "Invalid value for directory listing on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Invalid value for directory listing on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			directoryListingFound = true;
@@ -150,7 +150,7 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 		{
 			if (indexFound)
 			{
-				std::cerr << "Duplicate index on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate index on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			indexFound = true;
@@ -159,7 +159,7 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 		{
 			if (uploadDirectoryFound)
 			{
-				std::cerr << "Duplicate upload directory on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate upload directory on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			uploadDirectoryFound = true;
@@ -168,32 +168,32 @@ bool ConfigParser::validateOneLocation(std::ifstream &ifs, const std::string &fi
 		{
 			if (tokens.size() != 3)
 			{
-				std::cerr << "Invalid number of arguments for cgi on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Invalid number of arguments for cgi on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			std::string cgi = tokens.at(1);
 			if (cgi.empty() || cgi.at(0) != '.')
 			{
-				std::cerr << "Invalid cgi format (expected .xyz) on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Invalid cgi format (expected .xyz) on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			for (std::vector<std::string>::iterator it = cgiList.begin(); it != cgiList.end(); ++it)
 			{
 				if (*it == cgi)
 				{
-					std::cerr << "Duplicate cgi '" << cgi << "' on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+					std::cerr << "Duplicate cgi '" << cgi << "' on line '" << Utils::trim(line) << "'" << std::endl;
 					return false;
 				}
 			}
 			cgiList.push_back(cgi);
 		}
-		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
+		else if (Utils::trim(line).size() == 0 || Utils::trim(line).at(0) == '#')
 		{
 			continue;
 		}
 		else
 		{
-			std::cerr << "Invalid line in location: '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+			std::cerr << "Invalid line in location: '" << Utils::trim(line) << "'" << std::endl;
 			return false;
 		}
 	}
@@ -225,7 +225,7 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 	{
 		while (std::getline(ifs, line))
 		{
-			std::string trimmedLine = Utils::trim(line, " \n\t");
+			std::string trimmedLine = Utils::trim(line);
 			if (trimmedLine.empty() || trimmedLine.at(0) == '#')
 				continue;
 			else if (trimmedLine != "{")
@@ -278,12 +278,12 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 		{
 			if (portFound)
 			{
-				std::cerr << "Duplicate port on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate port on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			if (tokens.size() != 2 || !Utils::isNumber(tokens.at(1)))
 			{
-				std::cerr << "Invalid port value on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Invalid port value on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			portFound = true;
@@ -292,7 +292,7 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 		{
 			if (serverNamesFound)
 			{
-				std::cerr << "Duplicate server_names on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate server_names on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			serverNamesFound = true;
@@ -301,7 +301,7 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 		{
 			if (tokens.size() != 3 || !Utils::isNumber(tokens.at(1)))
 			{
-				std::cerr << "Invalid error_page value on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Invalid error_page value on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 
@@ -309,7 +309,7 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 			{
 				if (*it == tokens.at(1))
 				{
-					std::cerr << "Duplicate error_page on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+					std::cerr << "Duplicate error_page on line '" << Utils::trim(line) << "'" << std::endl;
 					return false;
 				}
 			}
@@ -320,12 +320,12 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 		{
 			if (maxClientBodySizeFound)
 			{
-				std::cerr << "Duplicate max_client_body_size on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Duplicate max_client_body_size on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			if (tokens.at(1).find_first_not_of("0123456789_") != std::string::npos)
 			{
-				std::cerr << "Invalid max_client_body_size value on line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+				std::cerr << "Invalid max_client_body_size value on line '" << Utils::trim(line) << "'" << std::endl;
 				return false;
 			}
 			maxClientBodySizeFound = true;
@@ -335,13 +335,13 @@ bool ConfigParser::validateOneServer(std::ifstream &ifs, const std::string &firs
 			if (validateOneLocation(ifs, line) == false)
 				return false;
 		}
-		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
+		else if (Utils::trim(line).size() == 0 || Utils::trim(line).at(0) == '#')
 		{
 			continue;
 		}
 		else
 		{
-			std::cerr << "Invalid line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+			std::cerr << "Invalid line '" << Utils::trim(line) << "'" << std::endl;
 			return false;
 		}
 	}
@@ -373,14 +373,14 @@ bool ConfigParser::validateConfigFile()
 			if (validateOneServer(ifs, line) == false)
 				return false;
 		}
-		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
+		else if (Utils::trim(line).size() == 0 || Utils::trim(line).at(0) == '#')
 		{
 			continue;
 		}
 		else
 		{
 			// We are outside a server
-			std::cerr << "Invalid line '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+			std::cerr << "Invalid line '" << Utils::trim(line) << "'" << std::endl;
 			return false;
 		}
 	}
@@ -475,13 +475,13 @@ Server::Location ConfigParser::parseOneLocation(std::ifstream &ifs, const std::s
 		{
 			location.uploadDirectory = values.at(1);
 		}
-		else if (Utils::trim(line, " \n\t").size() == 0 || Utils::trim(line, " \n\t").at(0) == '#')
+		else if (Utils::trim(line).size() == 0 || Utils::trim(line).at(0) == '#')
 		{
 			continue;
 		}
 		else
 		{
-			std::cerr << "Invalid line in server: '" << Utils::trim(line, " \n\t") << "'" << std::endl;
+			std::cerr << "Invalid line in server: '" << Utils::trim(line) << "'" << std::endl;
 			return location;
 		}
 
@@ -566,7 +566,7 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 				// { on other line
 				while (std::getline(ifs, line))
 				{
-					std::string trimmedLine = Utils::trim(line, " \n\t");
+					std::string trimmedLine = Utils::trim(line);
 					if (trimmedLine.empty() || trimmedLine.at(0) == '#')
 						continue;
 					else
@@ -596,6 +596,23 @@ Server ConfigParser::parseOneServer(std::ifstream &ifs)
 		}
 	}
 
+	// iterate over locations
+	bool foundRootLocation = false;
+	for (std::vector<Server::Location>::iterator it = server.locations.begin(); it != server.locations.end(); it++)
+	{
+		if (it->path == "/")
+		{
+			foundRootLocation = true;
+			break;
+		}
+	}
+
+	if (!foundRootLocation)
+	{
+		std::cerr << "Server on port " << server.port << " has no root location ('location /'), it is mandatory" << std::endl;
+		throw ConfigFileError(); 
+	}
+
 	return server;
 }
 
@@ -610,10 +627,15 @@ std::vector<Server> ConfigParser::parseConfig()
 	std::string line;
 	while (std::getline(ifs, line))
 	{
+		line = Utils::trim(line);
+
 		if (line.empty())
 			continue;
 
 		std::vector<std::string> values = Utils::split(line, " \t");
+
+		if (Utils::trim(line).at(0) == '#')
+			continue;
 
 		// it's either 'server {' or 'server \n {'
 		if (values.size() == 1 && values.at(0) == "server")
@@ -621,7 +643,7 @@ std::vector<Server> ConfigParser::parseConfig()
 			while (std::getline(ifs, line))
 			{
 				// no need to check for '{' as it is checked before
-				std::string trimmedLine = Utils::trim(line, " \n\t");
+				std::string trimmedLine = Utils::trim(line);
 				if (trimmedLine.empty() || trimmedLine.at(0) == '#')
 					continue;
 				else
@@ -631,6 +653,7 @@ std::vector<Server> ConfigParser::parseConfig()
 		servers.push_back(this->parseOneServer(ifs));
 	}
 
+	ifs.close();
 
 	#if DEBUG
 	for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
@@ -695,6 +718,5 @@ std::vector<Server> ConfigParser::parseConfig()
 	}
 	#endif
 
-	ifs.close();
 	return servers;
 }

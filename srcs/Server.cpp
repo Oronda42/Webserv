@@ -12,7 +12,5 @@
 
 #include "Server.hpp"
 
-Server::Server() : port(80), maxBodySize(1)
-{
-	
-}
+Server::Server() : port(80), maxBodySize(-1)
+{ }

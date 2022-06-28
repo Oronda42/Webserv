@@ -64,7 +64,7 @@ int main(int argc, char const *argv[])
 	}
 	catch (FileNotFoundException &e)
 	{
-		std::cout << "Cannot open file " << configFile << std::endl;
+		std::cerr << "Cannot open file " << configFile << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	catch (ConfigFileError &e)
@@ -215,8 +215,12 @@ int main(int argc, char const *argv[])
 				if (!clients[i].header_received) {
 					char buffer[BUFFER_SIZE] = {0};
 					int r = recv(clients[i].fd, buffer, BUFFER_SIZE, 0);
+
+					#if DEBUG
 					if (r < 0)
 						std::cout << "Nothing to read from client connection : " << ntohs(client_addr.sin_addr.s_addr)  << std::endl;
+					#endif
+
 					clients[i].raw_request.append(buffer, r);
 			
 					size_t foundPos = clients[i].raw_request.find("\r\n\r\n");
@@ -270,19 +274,7 @@ int main(int argc, char const *argv[])
 					Server server = findMatchingServer(servers, clients[i].request.getHost(), clients[i].request.getPort());
 					Response response(clients[i].request, server);
 
-					std::string responseStr;
-					if (clients[i].request.getContentLength() > server.maxBodySize) {
-						std::cout << "Body too big :" << clients[i].request.getContentLength() << " bytes but the server only accepts " << server.maxBodySize << " at most\n";
-						responseStr = response.generateResponse(413, "resources/errors/413.html");
-					}
-					else if (!clients[i].request.isValid())
-					{
-						std::cout << "Invalid request\n";
-						responseStr = response.generateResponse(400, "resources/errors/400.html");
-					}
-					else {
-						responseStr = response.generateResponse();
-					}
+					std::string responseStr = response.generateResponse();
 
 					std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
 

@@ -1,11 +1,10 @@
 #ifndef REQUEST_HPP
-# define REQUEST_HPP
-
-#include <iostream>
+#define REQUEST_HPP
 
 #include "Utils.hpp"
 #include "MimeParser.hpp"
 
+#include <iostream>
 
 class Request
 {
@@ -31,6 +30,7 @@ class Request
 	public:
 		Request();
 		Request(const std::string &rawRequest);
+		
 		std::string  getUri() const;
 		std::string  getMethod() const;
 		std::string  getProtocol() const;
@@ -41,7 +41,6 @@ class Request
 		std::string  getHost() const;
 		int          getPort() const;
 		bool 		 isValid() const;
-		 
 };
 
 #endif

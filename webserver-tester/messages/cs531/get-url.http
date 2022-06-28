@@ -1,4 +1,0 @@
-GET http://<HOSTPORT><PATH> HTTP/1.1
-Host: <HOSTPORT>
-Connection: close
-

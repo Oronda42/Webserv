@@ -1,10 +1,11 @@
 #include "Response.hpp"
+
 #include <algorithm>
+#include <sstream>
+#include <iostream>
 
 Response::Response(const Request &request, const Server &server) : _request(request) , _server(server), _protocol(_request.getProtocol())
-{
-	
-}
+{ }
 
 struct compareLocationByLength
 {
@@ -49,6 +50,28 @@ std::string Response::replaceLocationRoot(const Server::Location &location, cons
 	return replaced;
 }
 
+int createDeleteResponseCode(int success)
+{
+	if (success == 0)
+		return 200;
+	else
+	{
+		if (errno == EACCES)
+			return 403;
+		return 404;
+	}
+}
+
+std::string Response::createBadRequestResponse()
+{
+	return (generateResponse(400, "ressources/errors/400.html"));
+}
+
+std::string Response::createPayloadTooLargeResponse()
+{
+	return (generateResponse(413, "resources/errors/413.html"));
+}
+
 std::string Response::createCgiResponse(const CGI &cgi, const std::string &uploadDirectory)
 {
 	std::string rawCgiContent;
@@ -58,38 +81,18 @@ std::string Response::createCgiResponse(const CGI &cgi, const std::string &uploa
 		rawCgiContent = cgi.executeCgiPost(_request.getUri(), _request.getHeader(), _request.getContent(), uploadDirectory);
 
 	std::string response = rawCgiContent;
-	response.insert(0, createResponseCodeStatus(_request.getProtocol(), 200));
+	if (response == "")
+		return createBadRequestResponse();
+	else
+		response.insert(0, createResponseCodeStatus(_protocol, 200));
 
 	return response;
-}
-
-int createDeleteResponseCode(int success)
-{
-	if (success == 0)
-		return 200;
-	else
-		return 204;
 }
 
 std::string Response::createFileResponse(const std::string &filePath)
 {
 	std::string fileToFind = filePath;
-
-	if(_request.getMethod() == "DELETE")
-	{
-		int succcess = remove(_filePath.c_str());
-		if(succcess == 0)
-		{
-			_code = createDeleteResponseCode(succcess);
-			_status = createResponseStatus(_code);
-			_content = Utils::getRawDocumentContent("resources/delete.html");
-			_contentType = MimeParser::mimeMap[Utils::getFileExtension(fileToFind)];
-		}
-		return createHeader(_content, _code, _contentType, _content.length());
-	}
 	_code = createResponseCode(fileToFind);
-	_status = createResponseStatus(_code);
-
 
 	if (_code == 404)
 		fileToFind = "resources/errors/404.html";
@@ -98,8 +101,6 @@ std::string Response::createFileResponse(const std::string &filePath)
 	else if (_code == 400)
 		fileToFind = "resources/errors/400.html";
 	
-
-	std::cout << "server error pages count : " << _server.errorPages.size() << std::endl;
 	for (std::map<int, std::string>::const_iterator errorPagesIte = _server.errorPages.begin(); errorPagesIte != _server.errorPages.end(); ++errorPagesIte)
 	{
 		int errorCode = errorPagesIte->first;
@@ -108,98 +109,150 @@ std::string Response::createFileResponse(const std::string &filePath)
 		std::cout << "ErrorCode in config:  " <<errorCode<<std::endl;
 		if (errorCode == _code)
 		{
+			// Check if error page is found, otherwise use default error page
 			int errorPageCode = createResponseCode(errorPage);
 			if (errorPageCode >= 200 && errorPageCode < 300)
 				fileToFind = errorPage;
 		}
 	}
-	
 	_content = Utils::getRawDocumentContent(fileToFind);
-	_contentType = MimeParser::mimeMap[Utils::getFileExtension(fileToFind)];
-
-	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());
+	_contentType = MimeParser::getAssociatedType(Utils::getFileExtension(fileToFind));
+	_header = createHeader(_code, _contentType, _content.length());
 	
-	std::string extension = Utils::getFileExtension(fileToFind);
-	std::cout << "extension is " << extension << std::endl;
-	std::cout << "associated type is " << MimeParser::mimeMap.size() << ", "<< MimeParser::mimeMap.at(extension) << std::endl;
-
-	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	return constructResponse(_header, _content);
+}
+
+std::string Response::createDeleteResponse(const std::string &filePathToDelete)
+{
+	#if DEBUG
+	std::cout << "Deleting file " << filePathToDelete << std::endl;
+	#endif
+
+	int succcess = remove(filePathToDelete.c_str());
+
+	_code = createDeleteResponseCode(succcess);
+
+	if(succcess == 0)
+	{
+		#if DEBUG
+		std::cout << "Successfully deleted " << filePathToDelete << std::endl;
+		#endif
+
+		_content = Utils::getRawDocumentContent("resources/delete.html");
+		_contentType = MimeParser::getAssociatedType(Utils::getFileExtension("resources/delete.html"));
+	}
+	else
+	{
+		#if DEBUG
+		std::cout << "Failed to delete " << filePathToDelete << std::endl;
+		#endif
+
+		_content = Utils::getRawDocumentContent("resources/delete-fail.html");
+		_contentType = MimeParser::getAssociatedType(Utils::getFileExtension("resources/delete-fail.html"));
+	}
+	_header = createHeader(_code, _contentType, _content.length());
+
+	return constructResponse(_header, _content);
+}
+
+std::string Response::createDirectoryListingResponse(const std::string &dirPath, const std::string &requestedFilePath)
+{
+	std::string directoryListing = Utils::directoryToHtml(dirPath, requestedFilePath);
+	_content = directoryListing;
+	_contentType = "text/html";
+	_code = 200;
+	_header = createHeader(_code, _contentType, _content.length());
+
+	return constructResponse(_header, _content);
+}
+
+std::string Response::createNotAllowedResponse(const Server::Location &location)
+{
+	#if DEBUG
+		std::cout << "Method from request is not allowed\n";
+		#endif
+
+		std::string allowedMethods = "Allow: ";
+		for (std::vector<std::string>::const_iterator acceptedHttpMethodsIte = location.acceptedHttpMethods.begin(); acceptedHttpMethodsIte != location.acceptedHttpMethods.end(); ++acceptedHttpMethodsIte)
+		{
+			allowedMethods.append(*acceptedHttpMethodsIte);
+			if (acceptedHttpMethodsIte != location.acceptedHttpMethods.end() - 1)
+				allowedMethods.append(", ");
+		}
+		allowedMethods.append("\r\n");
+
+		_code = 405;
+		_content = Utils::getRawDocumentContent("resources/errors/405.html");
+		_contentType = MimeParser::getAssociatedType(Utils::getFileExtension("resources/errors/405.html"));
+		_header = createHeader(_code, _contentType, _content.length(), allowedMethods);		
+
+		return constructResponse(_header, _content);
 }
 
 std::string Response::generateResponse()
 {
-	std::cout << "++++++++++++++++++++++++++++  SERVER LOGS ++++++++++++++++++++++++++++" << std::endl;
+	#ifdef DEBUG
+		std::cout << "++++++++++++++++++++++++++++  SERVER LOGS ++++++++++++++++++++++++++++" << std::endl;
+	#endif
 
-	if (_request.getUri().empty())	
-		return "";
-	std::string onlyFilePath = Utils::split(_request.getUri(), '?').at(0);
-	Utils::removeHostName(onlyFilePath);
-	Utils::removeLastSlash(onlyFilePath);
-	if (onlyFilePath.empty() || onlyFilePath.at(0) != '/')
-		onlyFilePath.insert(0, "/");
+	if (!_request.isValid())
+		return createBadRequestResponse();
+
+	if (_request.getContentLength() != -1 && _server.maxBodySize != -1 && _request.getContentLength() > _server.maxBodySize)
+		return createPayloadTooLargeResponse();
+
+	std::string requestedFilePath = Utils::split(_request.getUri(), '?').at(0);
+	Utils::removeHostName(requestedFilePath);
+	Utils::removeLastSlash(requestedFilePath);
+	if (requestedFilePath.empty() || requestedFilePath.at(0) != '/')
+		requestedFilePath.insert(0, "/");
 	
-	Server::Location location = selectBestLocation(onlyFilePath);
+	Server::Location location = selectBestLocation(requestedFilePath);
 
 	if (std::find(location.acceptedHttpMethods.begin(), location.acceptedHttpMethods.end(), _request.getMethod()) == location.acceptedHttpMethods.end())
 	{
-		std::cout << "Not allowed\n";
+		return createNotAllowedResponse(location);
+	}
 
-		// Method not in accepted list
-		_code = 405;
-		_status = createResponseStatus(_code);
+	_filePath = replaceLocationRoot(location, requestedFilePath);
 
-		_content = Utils::getRawDocumentContent("resources/errors/405.html");
-		_contentType = MimeParser::mimeMap[Utils::getFileExtension("resources/errors/405.html")];
-
-		_header = createHeader(_request.getProtocol(), _code, "text/html", _content.length());
-		_header.erase(_header.length() - 4, 4); // remove header end
-		_header.append("\r\nAllow: ");
-
-		for (std::vector<std::string>::const_iterator acceptedHttpMethodsIte = location.acceptedHttpMethods.begin(); acceptedHttpMethodsIte != location.acceptedHttpMethods.end(); ++acceptedHttpMethodsIte)
-		{
-			_header.append(*acceptedHttpMethodsIte);
-			if (acceptedHttpMethodsIte != location.acceptedHttpMethods.end() - 1)
-				_header.append(", ");
-		}
-		_header.append("\r\n\r\n\r\n");
-		
-		
-		return constructResponse(_header, _content);
+	if (_request.getMethod() == "DELETE")
+	{
+		return createDeleteResponse(_filePath);
 	}
 	
-	if(!location.redirection.empty() && _code != 405)
+	if (!location.redirection.empty())
 	{
 		return createRedirectResponse(location.redirection);
 	}
-	_filePath = replaceLocationRoot(location, onlyFilePath);
 
+	#if DEBUG
 	std::cout << "Best location for " << _request.getUri() << " is " << location.path << std::endl;
+	#endif
 
-	std::cout << "checking if " << _filePath << " is a dir\n";
 	if (Utils::isDirectory(_filePath))
 	{
+		#if DEBUG
 		std::cout << _filePath << " is a directory\n";
+		#endif
+
 		if (!location.defaultFile.empty() && _filePath == location.rootPath)
 		{
 			_filePath = location.defaultFile;
-			std::cout << "Returning index " << location.defaultFile << std::endl;
+			#if DEBUG
+			std::cout << "Requested file match config index: " << location.defaultFile << std::endl;
+			#endif
 		}
 		else if (location.directoryListing)
 		{
-			// Create a file and fill it with Utils::directoryToHtml
-			std::string directoryListing = Utils::directoryToHtml(_filePath);
-			_content = directoryListing;
-			_contentType = "text/html";
-			_code = 200;
-			_status = createResponseStatus(_code);
-			_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());
-			return constructResponse(_header, _content);
+			// Generate directory listing basic html page
+			return createDirectoryListingResponse(_filePath, requestedFilePath);
 		}
 	}
 
 	std::string fileExtension = Utils::getFileExtension(_filePath);
 
+	// Check if file should be executed by CGI
 	for (std::vector<CGI>::const_iterator cgiIte = location.cgis.begin(); cgiIte != location.cgis.end(); ++cgiIte)
 	{
 		if (fileExtension == cgiIte->getExtension())
@@ -214,16 +267,15 @@ std::string Response::generateResponse()
 std::string Response::generateResponse(int code, const std::string &filePath)
 {
 	_code = code;
-	_status = createResponseStatus(_code);
 	_content = Utils::getRawDocumentContent(filePath);
-	_contentType = MimeParser::mimeMap[Utils::getFileExtension(filePath)];
-	_header = createHeader(_request.getProtocol(), _code, _contentType, _content.length());
+	_contentType = MimeParser::getAssociatedType(Utils::getFileExtension(filePath));
+	_header = createHeader(_code, _contentType, _content.length());
 	return constructResponse(_header, _content);
 }
 
-std::string Response::createRedirectResponse(std::string location)
+std::string Response::createRedirectResponse(const std::string &location)
 {
-	return createHeader(_request.getProtocol(), 301, location );
+	return createRedirectHeader(301, location);
 }
 
 std::string Response::constructResponse(const std::string &header, const std::string &content)
@@ -236,52 +288,34 @@ std::string Response::constructResponse(const std::string &header, const std::st
 	return ss.str();
 }
 
-
 std::string Response::createResponseCodeStatus(const std::string &protocol, int code)
 {
 	std::stringstream ss;
 
-	ss << protocol << ' ' << code << ' ' << HttpCodesParser::httpCodesMap[code] << "\r\n";
+	ss << protocol << ' ' << code << ' ' << HttpCodesParser::getAssociatedStatus(code) << "\r\n";
 	return ss.str();
 }
 
-std::string Response::createReponseContentLength(int contentLength)
+std::string Response::createHeader(int httpCode, const std::string &contentType, int contentLength, const std::string &specialHeaderLines)
 {
 	std::stringstream ss;
 
-	ss << "Content-Length: " << contentLength << "\r\n";
-	return ss.str();
-}
-
-std::string Response::createReponseContentType(const std::string &contentType)
-{
-	std::stringstream ss;
-
+	ss << createResponseCodeStatus(_protocol, httpCode);
 	ss << "Content-Type: " << contentType << "\r\n";
-	return ss.str();
-}
-
-std::string Response::createHeader(const std::string &protocol,
-								   int code,
-								   const std::string & contentType,
-								   int contentLength)
-{
-	std::stringstream ss;
-
-	ss << createResponseCodeStatus(protocol, code);
-	ss << createReponseContentType(contentType);
-	ss << createReponseContentLength(contentLength);
+	ss << "Content-Length: " << contentLength << "\r\n";
 	ss << Utils::getHttpDate() << "\r\n";
+	if (!specialHeaderLines.empty())
+		ss << specialHeaderLines;
 	ss << "\r\n";
 
 	return ss.str();
 }
 
-std::string Response::createHeader(const std::string &protocol, int code, std::string location)
+std::string Response::createRedirectHeader(int code, const std::string &location)
 {
 	std::stringstream ss;
 
-	ss << createResponseCodeStatus(protocol, code);
+	ss << createResponseCodeStatus(_protocol, code);
 	ss << "Location: " << location << "\r\n";
 	ss << Utils::getHttpDate() << "\r\n";
 	ss << "\r\n";
@@ -306,5 +340,5 @@ int Response::createResponseCode(const std::string &filePath)
 
 std::string Response::createResponseStatus(int code)
 {	
-	return HttpCodesParser::httpCodesMap[code];
+	return HttpCodesParser::getAssociatedStatus(code);
 }

@@ -36,20 +36,34 @@ HttpCodesParser::httpCodesMap_t HttpCodesParser::parseHttpCodesFile(const std::s
 	}
 	ifs.close();
 
-	#if DEBUG
-	std::cout << "HTTP Codes: [";
-	for (HttpCodesParser::httpCodesMap_t::const_iterator it = httpCodesMap.begin(); it != httpCodesMap.end(); ++it)
-	{
-		std::cout << it->first << ":'" << it->second << "']";
-		if (it != --httpCodesMap.end())
-			std::cout << ", [";
-		else
-			std::cout << "]";
-	}
-	std::cout << "}\n" << std::endl;
-	#endif
+	// #if DEBUG
+	// std::cout << "HTTP Codes: [";
+	// for (HttpCodesParser::httpCodesMap_t::const_iterator it = httpCodesMap.begin(); it != httpCodesMap.end(); ++it)
+	// {
+	// 	std::cout << it->first << ":'" << it->second << "']";
+	// 	if (it != --httpCodesMap.end())
+	// 		std::cout << ", [";
+	// 	else
+	// 		std::cout << "]";
+	// }
+	// std::cout << "}\n" << std::endl;
+	// #endif
 
 	return (httpCodesMap);
+}
+
+std::string HttpCodesParser::getAssociatedStatus(int code)
+{
+	std::string status;
+	try
+	{
+		status = httpCodesMap.at(code);
+	}
+	catch (std::out_of_range &e)
+	{
+		status = "Bad Request";
+	}
+	return status;
 }
 
 HttpCodesParser::HttpCodesParser(const std::string &httpCodesFile)

@@ -15,10 +15,12 @@
 class MimeParser
 {
 	public:
+		static std::string getAssociatedType(const std::string &extension);
+	
+	private:
 		typedef std::map<std::string, std::string> mimeMap_t;
 		static mimeMap_t mimeMap;
-
-	private:
+		
 		MimeParser();
 		MimeParser(const std::string& mimeFile);
 		
