@@ -230,11 +230,8 @@ int main(int argc, char const *argv[])
 						continue;
 					}
 
-					std::cout << "Header fully received\n";
-
 					clients[i].read_content_bytes = (clients[i].raw_request.size() - foundPos) - 4;
 					clients[i].request = Request(clients[i].raw_request);
-					std::cout << "Request sent to " << clients[i].request.getHost() << " on port " << clients[i].request.getPort() << std::endl;
 					clients[i].header_received = true;
 				}
 
@@ -246,8 +243,8 @@ int main(int argc, char const *argv[])
 					{
 						char buffer[BUFFER_SIZE] = {0};
 						int r = recv(clients[i].fd, buffer, BUFFER_SIZE, 0);
-						if (r < 0)
-							std::cout << "Nothing to read from client connection : " << ntohs(client_addr.sin_addr.s_addr)  << std::endl;
+						//if (r < 0)
+						//	std::cout << "Nothing to read from client connection : " << ntohs(client_addr.sin_addr.s_addr)  << std::endl;
 						clients[i].raw_request.append(buffer, r);
 
 						//readContentBytes += r;
@@ -256,11 +253,11 @@ int main(int argc, char const *argv[])
 							continue;
 					}
 
+					#if DEBUG
 					std::cout << "**************************** REQUEST RECEIVED ****************************" << std::endl;
-
 					std::cout << clients[i].raw_request;
-
 					std::cout << "***************************************************************************" << std::endl << std::endl;
+					#endif
 
 					clients[i].request = Request(clients[i].raw_request);
 					clients[i].is_ready = true;
@@ -276,9 +273,6 @@ int main(int argc, char const *argv[])
 
 					std::string responseStr = response.generateResponse();
 
-					std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
-
-					std::cout << responseStr.c_str();
 					if (!responseStr.empty()) 
 						send(clients[i].fd, responseStr.c_str(), responseStr.size(), 0);
 					FD_CLR(clients[i].fd, &write_fd_set);
@@ -286,7 +280,12 @@ int main(int argc, char const *argv[])
 					close(clients[i].fd);
 					clients.erase(clients.begin() + i);
 
+					#if DEBUG
+					std::cout << "----------------------------  SERVER RESPONSE ----------------------------" << std::endl;
+					std::cout << responseStr.c_str();
 					std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;
+					#endif
+
 				}
 			} // FD_ISSET(,write)
 		}

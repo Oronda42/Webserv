@@ -106,7 +106,6 @@ std::string Response::createFileResponse(const std::string &filePath)
 		int errorCode = errorPagesIte->first;
 		std::string errorPage = errorPagesIte->second;
 
-		std::cout << "ErrorCode in config:  " <<errorCode<<std::endl;
 		if (errorCode == _code)
 		{
 			// Check if error page is found, otherwise use default error page
