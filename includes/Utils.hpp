@@ -114,7 +114,7 @@ class Utils
 			std::stringstream ss;
 
 			if(!ifs.is_open())
-				throw FileNotFoundException();
+				throw FileNotFoundException("Cannot open file '" + file_path + "'");
 							
 			ss << ifs.rdbuf();		
 			ifs.close();

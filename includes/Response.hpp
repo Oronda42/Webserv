@@ -43,6 +43,7 @@ class Response
 		std::string createNotAllowedResponse(const Server::Location &location);
 		std::string createBadRequestResponse();
 		std::string createPayloadTooLargeResponse();
+		std::string createInternalServerErrorResponse(const std::string &error = "Internal server error");
 
 		std::vector<Server::Location> getSortedMatchingLocations(const std::string &filePath);		
 		Server::Location              selectBestLocation(const std::string &filePath);

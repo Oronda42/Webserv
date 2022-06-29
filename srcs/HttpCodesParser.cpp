@@ -8,7 +8,7 @@ HttpCodesParser::httpCodesMap_t HttpCodesParser::parseHttpCodesFile(const std::s
 	HttpCodesParser::httpCodesMap_t httpCodesMap;
 	
 	if (!ifs.is_open())
-		throw FileNotFoundException();
+		throw FileNotFoundException("Cannot open HTTP codes file ('" + httpCodesFile + "')");
 
 	while (std::getline(ifs, line)) 
 	{

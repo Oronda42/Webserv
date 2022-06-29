@@ -72,6 +72,15 @@ std::string Response::createPayloadTooLargeResponse()
 	return (generateResponse(413, "resources/errors/413.html"));
 }
 
+std::string Response::createInternalServerErrorResponse(const std::string &error)
+{
+	_code = 500;
+	_content = error;
+	_contentType = "text/plain";
+	_header = createHeader(_code, _contentType, _content.length());
+	return constructResponse(_header, _content);
+}
+
 std::string Response::createCgiResponse(const CGI &cgi, const std::string &uploadDirectory)
 {
 	std::string rawCgiContent;
@@ -114,7 +123,15 @@ std::string Response::createFileResponse(const std::string &filePath)
 				fileToFind = errorPage;
 		}
 	}
-	_content = Utils::getRawDocumentContent(fileToFind);
+	try
+	{
+		_content = Utils::getRawDocumentContent(fileToFind);
+	}
+	catch (FileNotFoundException &e)
+	{
+		return (createInternalServerErrorResponse("Server error while trying to find file " + fileToFind));
+	}
+
 	_contentType = MimeParser::getAssociatedType(Utils::getFileExtension(fileToFind));
 	_header = createHeader(_code, _contentType, _content.length());
 	
@@ -137,7 +154,15 @@ std::string Response::createDeleteResponse(const std::string &filePathToDelete)
 		std::cout << "Successfully deleted " << filePathToDelete << std::endl;
 		#endif
 
-		_content = Utils::getRawDocumentContent("resources/delete.html");
+		try
+		{
+			_content = Utils::getRawDocumentContent("resources/delete.html");
+		}
+		catch (FileNotFoundException &e)
+		{
+			return (createInternalServerErrorResponse("Server error while trying to find file resources/delete.html"));
+		}
+
 		_contentType = MimeParser::getAssociatedType(Utils::getFileExtension("resources/delete.html"));
 	}
 	else
@@ -146,7 +171,15 @@ std::string Response::createDeleteResponse(const std::string &filePathToDelete)
 		std::cout << "Failed to delete " << filePathToDelete << std::endl;
 		#endif
 
-		_content = Utils::getRawDocumentContent("resources/delete-fail.html");
+		try
+		{
+			_content = Utils::getRawDocumentContent("resources/delete-fail.html");
+		}
+		catch (FileNotFoundException &e)
+		{
+			return (createInternalServerErrorResponse("Server error while trying to find file resources/delete-fail.html"));
+		}
+
 		_contentType = MimeParser::getAssociatedType(Utils::getFileExtension("resources/delete-fail.html"));
 	}
 	_header = createHeader(_code, _contentType, _content.length());
@@ -181,7 +214,14 @@ std::string Response::createNotAllowedResponse(const Server::Location &location)
 		allowedMethods.append("\r\n");
 
 		_code = 405;
-		_content = Utils::getRawDocumentContent("resources/errors/405.html");
+		try
+		{
+			_content = Utils::getRawDocumentContent("resources/errors/405.html");
+		}
+		catch (FileNotFoundException &e)
+		{
+			return (createInternalServerErrorResponse("Server error while trying to find file resources/errors/405.html"));
+		}
 		_contentType = MimeParser::getAssociatedType(Utils::getFileExtension("resources/errors/405.html"));
 		_header = createHeader(_code, _contentType, _content.length(), allowedMethods);		
 
@@ -266,7 +306,15 @@ std::string Response::generateResponse()
 std::string Response::generateResponse(int code, const std::string &filePath)
 {
 	_code = code;
-	_content = Utils::getRawDocumentContent(filePath);
+	try
+	{
+		_content = Utils::getRawDocumentContent(filePath);
+	}
+	catch (FileNotFoundException &e)
+	{
+		return (createInternalServerErrorResponse("Server error while generating response trying to find file " + filePath));
+	}
+
 	_contentType = MimeParser::getAssociatedType(Utils::getFileExtension(filePath));
 	_header = createHeader(_code, _contentType, _content.length());
 	return constructResponse(_header, _content);

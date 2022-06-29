@@ -356,7 +356,7 @@ bool ConfigParser::validateConfigFile()
 	std::stack<char> bracketStack;
 
 	if (!ifs.is_open())
-		throw FileNotFoundException();
+		throw FileNotFoundException("Cannot open config file");
 
 	std::string line;
 	while (std::getline(ifs, line))
@@ -622,7 +622,7 @@ std::vector<Server> ConfigParser::parseConfig()
 	std::vector<Server> servers;
 
 	if (!ifs.is_open() || ifs.bad())
-		throw FileNotFoundException();
+		throw FileNotFoundException("Cannot open config file");
 
 	std::string line;
 	while (std::getline(ifs, line))

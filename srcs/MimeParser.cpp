@@ -8,7 +8,7 @@ MimeParser::mimeMap_t MimeParser::parseMimeFile(const std::string &mimeFile)
 	MimeParser::mimeMap_t mimeMap;
 
 	if (!ifs.is_open())
-		throw FileNotFoundException();
+		throw FileNotFoundException("Cannot open MIME file ('" + mimeFile + "')");
 
 	while (std::getline(ifs, line)) 
 	{
