@@ -64,7 +64,7 @@ int createDeleteResponseCode(int success)
 
 std::string Response::createBadRequestResponse()
 {
-	return (generateResponse(400, "ressources/errors/400.html"));
+	return (generateResponse(400, "resources/errors/400.html"));
 }
 
 std::string Response::createPayloadTooLargeResponse()
@@ -91,7 +91,10 @@ std::string Response::createCgiResponse(const CGI &cgi, const std::string &uploa
 
 	std::string response = rawCgiContent;
 	if (response == "")
+	{
+		std::cerr << "Empty response from CGI" << std::endl;
 		return createBadRequestResponse();
+	}
 	else
 		response.insert(0, createResponseCodeStatus(_protocol, 200));
 
@@ -303,6 +306,7 @@ std::string Response::generateResponse()
 	return createFileResponse(_filePath);
 }
 
+#include <unistd.h>
 std::string Response::generateResponse(int code, const std::string &filePath)
 {
 	_code = code;
@@ -382,7 +386,10 @@ int Response::createResponseCode(const std::string &filePath)
 	else if (fp == NULL)
 		return 404;
 	else
+	{
+		fclose(fp);
 		return 200;
+	}
 }
 
 std::string Response::createResponseStatus(int code)

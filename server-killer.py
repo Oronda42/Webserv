@@ -1,3 +1,5 @@
+#!/usr/local/bin/python3
+
 import requests
 import time
 
@@ -8,13 +10,22 @@ start = time.time()
 while True:
 	r = requests.get("http://localhost:" + hostname)
 	r = requests.get("http://localhost:" + hostname + "/cgi-bin/helloperl.pl")
+	r = requests.get("http://localhost:" + hostname + "/cgi-bin/helloworldpy.py?first_name=Olivier&last_name=Ronda+%3C3")
 
-	if not (r.text.find("Hello Pouet pouet pouet") != -1 and r.status_code == 200):
-		print("Server is dead")
+	# if not (r.text.find("Hello Pouet pouet pouet") != -1 and r.status_code == 200):
+	# 	print("Wrong response: " + r.text)
+	# 	break
+
+	if not (r.text.find("Hello Olivier") != -1 and r.status_code == 200):
+		print("Wrong response: " + r.text)
+		break
+
+	if (r.status_code != 200):
+		print("Wrong response: " + r.text)
 		break
 
 	# wait 100 ms
-	time.sleep(0.0001)
+	#time.sleep(0.0001)
 	i += 1
 	if (i % 50 == 0):
 		print("Request count: " + str(i))

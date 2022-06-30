@@ -72,6 +72,7 @@ std::string CGI::executeCGI(char **argv, char **env, const std::string &content)
 		if (readBytes == -1)
 		{
 			std::cerr << "Couldn't read from CGI " << argv[0] << ": " << strerror(errno) << std::endl;
+			close(fd_out[0]);
 			return "";
 		}
 
@@ -80,6 +81,7 @@ std::string CGI::executeCGI(char **argv, char **env, const std::string &content)
 		#endif
 
 		close(fd_out[0]);
+		waitpid(pid, NULL, 0);
 	}
 	// No need to free in fork because if execve successfull it's freed and if it fails it exits and the OS handles it
 	for (size_t i = 0; env[i]; i++)

@@ -1,0 +1,58 @@
+#hall-of-fame
+{
+	/* Main aligmnent (horizontal) */
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-around;
+
+	/* Secondary alignment (vertical) */
+	align-items: flex-start;
+}
+
+#hall-of-fame *
+{
+	background-color: aliceblue;
+	margin:50px;
+}
+
+header
+{
+	display: flex;
+	justify-content: right;
+
+	align-items: flex-start;
+}
+
+header a
+{
+	font: 2em 'Roboto', sans-serif;
+	text-decoration: none;
+	color:aqua;
+}
+
+#login-button
+{
+	position: absolute;
+	right: 0;
+	margin:10px;
+	justify-self: right;
+}
+
+#login-form
+{
+	display: none;
+	width: 50%;
+	height: 80%;
+	margin: auto;
+	background-color: rgba(0,0,0,0.6);
+	position: fixed;
+	top: 10%;
+	left: 25%;
+	z-index: 1;
+
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+	
+}

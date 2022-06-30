@@ -117,7 +117,7 @@ class Utils
 				throw FileNotFoundException("Cannot open file '" + file_path + "'");
 							
 			ss << ifs.rdbuf();		
-			ifs.close();
+			// ifs.close();
 			return ss.str();
 		}
 

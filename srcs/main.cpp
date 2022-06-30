@@ -151,7 +151,7 @@ int main(int argc, char const *argv[])
 		std::cout << "Listen on port "<< ntohs(sockaddr.sin_port) << std::endl << std::endl;*/
 
 	
-	int sockfd = serversMap.begin()->first;
+	//int sockfd = serversMap.begin()->first;
 
 	fd_set read_fd_set;
 	fd_set write_fd_set;
@@ -205,7 +205,9 @@ int main(int argc, char const *argv[])
 					// exit(EXIT_FAILURE);
 				}
 				clients.push_back(Client(client_fd)); // create client with the new fd
-				if (!(--ret_val)) continue;
+				// ret_val--; // decrement ret_val to avoid to check the same fd again
+				// if (ret_val == 0)
+				// 	continue ;
 			}
 		}
 		
@@ -291,5 +293,9 @@ int main(int argc, char const *argv[])
 		}
 	} // while(1)
 
-	close(sockfd);
+	// close all severs fd
+	for (std::map<int, Server>::iterator it = serversMap.begin(); it != serversMap.end(); ++it)
+		close(it->first);
+
+	//close(sockfd);ddasdas
 }

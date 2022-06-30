@@ -73,5 +73,6 @@
 		"stack": "cpp",
 		"filesystem": "cpp",
 		"__memory": "cpp"
-	}
+	},
+	"liveServer.settings.multiRootWorkspaceName": "Webserv-15"
 }

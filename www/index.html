@@ -3,15 +3,44 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Hello everyone</title> 
+		<link rel="stylesheet" href="css/style.css">
+		<script type="text/javascript" src="js/login.js" defer></script>
 	</head>
 
 	<body>
-		<!-- Cookie login -->
-		<h1>Welcome to our webserv</h1>
-		<img src="images/our_webserv.jpg" alt="Some communist meme">
-		<p>You are not loged in yet</p>
-
+		<header>
+			<h1><a href="images/our_webserv.jpg">Welcome to our webserv</a></h1>
+			<button id="login-button">Login</button>
+		</header>
+			
 		<a href = "/www/index.html">Hey, check out this nice redirection</a>
 
+		<form id="login-form">
+			<div class="login-form-username">
+				<label for="username">Username</label>
+				<input type="text" id="username" name="username" placeholder="Username">
+			</div>
+			<button class="login-form-button">Login</button>
+		</form>
+
+		<div id="hall-of-fame">
+			<section id="oronda">
+				<h1>Bella Ronda</h1>
+				<img src="images/oronda.png" alt="oronda">
+			</section>
+			
+			<section id="mframbou">
+				<h1>Bello Crackette</h1>
+				<img src="images/mframbou.png" alt="mframbou">
+			</section>
+			
+			<section id="dsamain">
+				<h1>Bello Mano</h1>
+				<img src="images/dsamain.png" alt="dsamain">
+			</section>
+		</div>
+
 	</body>
+
+	<footer>Copyleft, aucuns droits depuis 1990</footer>
 </html>
