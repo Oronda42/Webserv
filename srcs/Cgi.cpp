@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -81,7 +82,7 @@ std::string CGI::executeCGI(char **argv, char **env, const std::string &content)
 		#endif
 
 		close(fd_out[0]);
-		waitpid(pid, NULL, 0);
+		waitpid(pid, NULL, WNOHANG);
 	}
 	// No need to free in fork because if execve successfull it's freed and if it fails it exits and the OS handles it
 	for (size_t i = 0; env[i]; i++)

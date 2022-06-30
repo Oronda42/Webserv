@@ -112,6 +112,12 @@ int main(int argc, char const *argv[])
 		std::cout << "Server on port " << s.port << " created and listening" << std::endl;
 		serversMap[fd] = s;
 	}
+
+	if(serversMap.empty())
+	{
+		std::cerr << "No server could be created" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	
 	
 	// Create a socket (IPv4, TCP)
