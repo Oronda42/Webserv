@@ -44,7 +44,9 @@ $(NAME):	$(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 	@echo "$(GREEN_BOLD)Done compiling $(GREEN_UNDERLINE)$(NAME)"
 
-all:		$(NAME)
+all: $(NAME)
+
+bonus: all
 
 debug: fclean
 	@echo "$(YELLOW)Enabling debug mode$(RESET)"
@@ -61,4 +63,4 @@ fclean:		clean
 
 re:			fclean all
 
-.PHONY:	all clean fclean re
+.PHONY:	all clean fclean re bonus
