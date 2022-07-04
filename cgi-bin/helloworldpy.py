@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
 # Import modules for CGI handling 
-import cgi, cgitb 
+import cgi 
 
 # Create instance of FieldStorage 
 form = cgi.FieldStorage()
 
 # Get data from fields
-first_name = form.getvalue('first_name')
-last_name  = form.getvalue('last_name')
+username = form.getvalue('username')
+password = form.getvalue('password')
 
 #print(form.keys())
 
@@ -18,7 +18,7 @@ content = [
 	"<title>Hello - Second CGI Program</title>",
 	"</head>",
 	"<body>",
-	"<h2>Hello {fname} {lname}</h2>".format(fname = first_name, lname = last_name),
+	"<h2>Hello {username}, your password is {password}</h2>".format(username = username, password = password),
 	"</body>",
 	"</html>"
 ]

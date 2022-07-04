@@ -1,25 +1,25 @@
-const loginButton = document.getElementById('login-button');
-const loginForm = document.getElementById('login-form');
+function getCookie(cname)
+{
+	let name = cname + "=";
+	let decodedCookie = decodeURIComponent(document.cookie);
+	let ca = decodedCookie.split(';');
 
-
-loginButton.addEventListener("click", () => {
-	loginForm.style.display = "flex";
-});
-
-function hasParent(element, parentSelector) {
-    var potentialParents = document.querySelectorAll(parentSelector);
-    for(i in potentialParents)
+	for(let i = 0; i <ca.length; i++)
 	{
-		if(potentialParents[i].contains(element))
-        	return potentialParents[i];
+		let c = ca[i];
+
+		while (c.charAt(0) == ' ')
+			c = c.substring(1);
+
+		if (c.indexOf(name) == 0)
+			return c.substring(name.length, c.length);
 	}
-	return false;
+	return null;
 }
 
-window.onclick = function(event) {
-	// Check if event.target is not a child of loginform
-	console.log(event.target);
-	if (event.target != loginForm && event.target != loginButton && !event.target.contains("login")) {
-		loginForm.style.display = "none";
-	}
+window.onload = function()
+{
+	console.log("test");
+	if (getCookie("webserv_username") != null)
+		document.getElementById("logged-in-username").innerHTML = "Hello " + getCookie("webserv_username");
 }

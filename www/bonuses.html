@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Hello no one</title> 
+		<link rel="stylesheet" href="css/style.css">
+		<script type="text/javascript" src="js/login.js" defer></script>
+		<script type="text/javascript" src="js/sidenav.js" defer></script>
+	</head>
+
+	<header>
+		<span class="side-menu" style="font-size:30px;cursor:pointer" onclick="showSideNav()">&#9776; Menu</span>
+		<p id="logged-in-username">You are not logged in yet</p>
+	</header>
+
+	<body>
+
+		<div id="sidenav">
+			<a href="javscript:void(0)" = class="closebtn" onclick="hideSideNav()">&times;</a>
+			
+			<a href="index.html">Home</a>
+			<a href="cgi.html">CGIs</a>
+			<a href="bonuses.html">Bonuses</a>
+		</div>
+
+
+		<div id="cgis-examples">
+			<!-- Multiple classes for each div (all common cgi) -->
+			<div class="cgi-get cgi">
+				<h1>This is a CGI using the GET method (perl)</h1>
+				<form action="/cgi-bin/helloperl.pl" method="GET">
+					<label>First name:<br><input type="text" name="fname" placeholder="First name"></label>
+					<label>Last name:<br><input type="text" name="lname" placeholder="Last name"></label>
+					<button class="btn">Submit</button>
+				</form>
+			</div>
+
+			<div class="cgi-post cgi">
+				<h1>This is a CGI using the POST method (python)</h1>
+				<form action="/cgi-bin/helloworldpy.py" method="POST">
+					<label>Username:<br><input type="text" name="username" placeholder="Username"></label>
+					<label>Password (will be shown after):<br><input type="password" name="password" placeholder="Password"></label>
+					<button class="btn">Submit</button>
+				</form>
+			</div>
+
+			<div class="cgi-upload cgi">
+				<h1>This is a CGI to upload files</h1>
+				<form action="/cgi-bin/upload.py" method="POST" enctype="multipart/form-data">
+					<input class="file-upload" type="file">
+					<button class="btn">Submit</button>
+				</form>
+			</div>
+
+			<div class="cgi-session cgi">
+				<h1>This is a CGI to create a cookie for session management</h1>
+				<form action="/cgi-bin/cookie_creator.py" method="GET">
+					<label>Choose a name: <input type="text" name="username" placeholder="Gigachad"></label>
+					<button class="btn">Submit</button>
+				</form>
+			</div>
+
+		</div>
+	</body>
+
+</html>

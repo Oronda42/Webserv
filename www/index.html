@@ -5,15 +5,20 @@
 		<title>Hello everyone</title> 
 		<link rel="stylesheet" href="css/style.css">
 		<script type="text/javascript" src="js/login.js" defer></script>
+		<script type="text/javascript" src="js/index.js" defer></script>
+		<script type="text/javascript" src="js/sidenav.js" defer></script>
 	</head>
 
 	<body>
 		<header>
+			<span class="side-menu" style="font-size:30px;cursor:pointer" onclick="showSideNav()">&#9776; Menu</span>
+			<p id="logged-in-username">You are not logged in yet</p>
 			<h1><a href="images/our_webserv.jpg">Welcome to our webserv</a></h1>
 			<button id="login-button">Login</button>
 		</header>
 			
-		<a href = "/www/index.html">Hey, check out this nice redirection</a>
+		<!-- <a href = "/www/index.html">Hey, check out this nice redirection</a> -->
+
 
 		<form id="login-form">
 			<div class="login-form-username">
@@ -23,24 +28,36 @@
 			<button class="login-form-button">Login</button>
 		</form>
 
-		<div id="hall-of-fame">
-			<section id="oronda">
-				<h1>Bella Ronda</h1>
-				<img src="images/oronda.png" alt="oronda">
-			</section>
+		<div id="sidenav">
+			<a href="javscript:void(0)" = class="closebtn" onclick="hideSideNav()">&times;</a>
 			
-			<section id="mframbou">
-				<h1>Bello Crackette</h1>
-				<img src="images/mframbou.png" alt="mframbou">
-			</section>
-			
-			<section id="dsamain">
-				<h1>Bello Mano</h1>
-				<img src="images/dsamain.png" alt="dsamain">
-			</section>
+			<a href="index.html">Home</a>
+			<a href="cgi.html">CGIs</a>
+			<a href="bonuses.html">Bonuses</a>
 		</div>
-
-	</body>
-
-	<footer>Copyleft, aucuns droits depuis 1990</footer>
+		
+		<section id="hall-of-fame">
+			<div>
+				<h1>Choose your fighter</h1>
+			</div>
+			
+			<div id="fighter-list">
+				<div class="card" id="oronda" style="cursor:pointer" onclick="cardClicked('oronda')">
+					<h1 class="name">Bella Ronda</h1>
+					<img src="images/oronda.png" alt="oronda">
+				</div>
+				
+				<div class="card" id="mframbou" style="cursor:pointer" onclick="cardClicked('mframbou')">
+					<h1 class="name">Bello Crackette</h1>
+					<img src="images/mframbou.png" alt="mframbou">
+				</div>
+				
+				<div class="card" id="dsamain" style="cursor:pointer" onclick="cardClicked('dsamain')">
+					<h1 class="name">Bello Mano</h1>
+					<img src="images/dsamain.png" alt="dsamain">
+				</div>
+			</div>
+		</section>		
+		
+		<footer>Copyleft, aucuns droits depuis 1990</footer>
 </html>

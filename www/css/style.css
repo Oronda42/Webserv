@@ -1,4 +1,25 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i&subset=greek-ext');
+
+body
+{
+	cursor: auto;
+	font-family: 'Noto Sans', sans-serif;
+	color: #fff;
+	background-color: rgb(25,25,25);
+}
+
 #hall-of-fame
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	/* background-color: lightgray; */
+}
+
+#fighter-list
 {
 	/* Main aligmnent (horizontal) */
 	display: flex;
@@ -7,20 +28,54 @@
 
 	/* Secondary alignment (vertical) */
 	align-items: flex-start;
+	/* background-color: aliceblue; */
+	background-color: #141216;
+	border-radius: 10px;
+	width: 100%;
 }
 
-#hall-of-fame *
+#fighter-list .card
 {
-	background-color: aliceblue;
-	margin:50px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	/* padding:30px; */
+	margin: 25px;
+
+	border-radius: 20px;
+
+	transition-duration: 0.4s;
+}
+
+
+#fighter-list .card img
+{
+	margin: 100px;
+	margin-top: 175px;
+	border-radius: 30px;
+}
+
+#fighter-list .card:hover
+{
+	background-color: rgb(204, 204, 204);
+	color: white;
+	/* transform: scale(1.05) rotate(360deg); */
+	transform: scale(1.02) rotate(-0.8deg) translateY(-15px);
+}
+
+#fighter-list img
+{
+	border-radius: 10px;
 }
 
 header
 {
 	display: flex;
-	justify-content: right;
+	flex-direction: row;
 
-	align-items: flex-start;
+	justify-content: left;
+	align-items: center;
 }
 
 header a
@@ -30,12 +85,31 @@ header a
 	color:aqua;
 }
 
+header .side-menu
+{
+	justify-self: left;
+}
+
 #login-button
 {
 	position: absolute;
 	right: 0;
-	margin:10px;
-	justify-self: right;
+	margin-right:20px;
+	border-radius: 15px;
+	background-color: aqua;
+	color: white;
+	font: 1.5em 'Roboto', sans-serif;
+	text-decoration: none;
+	padding: 15px;
+
+	transition: transform 1s;
+}
+
+
+#login-button:active
+{
+	transform: rotateX(1800deg);
+	transition: transform 3s;
 }
 
 #login-form
@@ -54,5 +128,129 @@ header a
 	justify-content: center;
 	align-items: center;
 
-	
+	border-radius: 15px;
+}
+
+.login-form-username
+{
+	display: flex;
+	flex-direction: column;
+
+	align-items: center;
+	margin: 10px;
+}
+
+#sidenav
+{
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 0;
+	background-color: rgba(0,0,0,0.8);
+	backdrop-filter: blur(1px);
+	z-index: 1;
+	position:fixed;
+	overflow-x: auto;
+
+	transition-duration: 0.5s;
+	top: 0;
+}
+
+#sidenav a
+{
+	padding: 8px 8px 8px 32px;
+	text-decoration: none;
+	font-size: 25px;
+	color: #818181;
+}
+
+#sidenav a:hover
+{
+	color: #f1f1f1;
+}
+
+#sidenav .closebtn
+{
+	padding: 10px;
+	position: absolute;
+	top: 0;
+	right: 25px;
+	font-size: 36px;
+}
+
+#cgis-examples
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#cgis-examples .cgi
+{
+	background-color: rgba(0, 0, 0, 0.89);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 60%;
+	margin: 25px 0 25px 0;
+	border-radius: 5px;
+	padding: 15px 0 15px 0;
+}
+
+#cgis-examples .cgi form
+{
+	/* background-color: blue; */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+#cgis-examples input
+{
+	border:0;
+	border-bottom:1px solid #555;  
+	background:transparent;
+	width:100%;
+	padding:8px 0 5px 0;
+	font-size:16px;
+	color:#fff;
+}
+
+#cgis-examples input:focus
+{
+	border:none;	
+	outline:none;
+	border-bottom:1px solid #e74c3c;	
+}
+
+#cgis-examples .btn
+{
+	color:#fff;
+	background-color:#e74c3c;
+	outline: none;
+    border: 0;
+    color: #fff;
+	padding:10px 20px;
+	text-transform:uppercase;
+	margin-top:50px;
+	border-radius:2px;
+	cursor:pointer;
+	position:relative;
+}
+
+#cgis-examples form label
+{
+	margin-top: 25px;
+}
+
+#cgis-examples .file-upload
+{
+	/* custom file upload butotn */
+	overflow: auto;
+	border-radius: 5px;
+	background-color: transparent;
+	color: white;
+	padding: 10px;
 }

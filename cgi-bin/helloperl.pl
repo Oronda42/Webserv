@@ -1,9 +1,24 @@
 #!/usr/bin/perl
-  
+
+
 # Modules used
 use strict;
 use warnings;
-  
+use CGI;
+
+my $cgi = CGI->new;
+
+my $fname = $cgi->param('fname');
+my $lname = $cgi->param('lname');
+
+# Check if fname and lname are intiailize
+if (not defined $fname) {
+	$fname = "(undefined)";
+}
+
+if (not defined $lname) {
+	$lname = "(undefined)";
+}
 
 my @content = (
 	"<html>",
@@ -11,7 +26,7 @@ my @content = (
 	"<title>Hello - Second CGI Program</title>",
 	"</head>",
 	"<body>",
-	"<h2>Hello Pouet pouet pouet</h2>",
+	"<h2>Hello $fname $lname</h2>",
 	"</body>",
 	"</html>"
 );
@@ -33,5 +48,3 @@ foreach ( @content )
 {
 	print($_);
 }
-
-__END__

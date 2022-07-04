@@ -17,6 +17,6 @@ function getCookie(cname) {
 
 // modify the lement id "pouet"
 
-  if (getCookie("username") != null) {
+if (getCookie("username") != null) {
 	document.getElementById("pouet").innerHTML = "Hello " + getCookie("username");
-  }
+}
