@@ -5,7 +5,7 @@ body
 	cursor: auto;
 	font-family: 'Noto Sans', sans-serif;
 	color: #fff;
-	background-color: rgb(25,25,25);
+	background-color: black;
 }
 
 #hall-of-fame
@@ -154,6 +154,7 @@ header .side-menu
 
 	transition-duration: 0.5s;
 	top: 0;
+	left: 0;
 }
 
 #sidenav a
@@ -184,18 +185,19 @@ header .side-menu
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	padding: 0 8rem;
+	gap: 2rem;
 }
 
 #cgis-examples .cgi
 {
-	background-color: rgba(0, 0, 0, 0.89);
+	background-color: rgb(30, 30, 34);
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	width: 60%;
-	margin: 25px 0 25px 0;
+	/* align-items: center; */
+	width: 100%;
 	border-radius: 5px;
-	padding: 15px 0 15px 0;
+	padding: 1rem;
 }
 
 #cgis-examples .cgi form
@@ -203,8 +205,8 @@ header .side-menu
 	/* background-color: blue; */
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	text-align: center;
+	/* align-items: center; */
+	/* text-align: center; */
 }
 
 #cgis-examples input

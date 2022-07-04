@@ -20,19 +20,19 @@
 		<!-- <a href = "/www/index.html">Hey, check out this nice redirection</a> -->
 
 
-		<form id="login-form">
-			<div class="login-form-username">
+		<form action="/cgi-bin/cookie_creator.py" method="GET" id="login-form">
+			<form class="login-form-username">
 				<label for="username">Username</label>
 				<input type="text" id="username" name="username" placeholder="Username">
-			</div>
-			<button class="login-form-button">Login</button>
+				<input type="submit">
+			</form>
 		</form>
 
 		<div id="sidenav">
 			<a href="javscript:void(0)" = class="closebtn" onclick="hideSideNav()">&times;</a>
 			
 			<a href="index.html">Home</a>
-			<a href="cgi.html">CGIs</a>
+			<!-- <a href="cgi.html">CGIs</a> -->
 			<a href="bonuses.html">Bonuses</a>
 		</div>
 		

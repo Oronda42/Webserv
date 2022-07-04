@@ -9,8 +9,8 @@ i = 0
 start = time.time()
 while True:
 	r = requests.get("http://localhost:" + hostname)
-	r = requests.get("http://localhost:" + hostname + "/cgi-bin/helloperl.pl")
-	r = requests.get("http://localhost:" + hostname + "/cgi-bin/helloworldpy.py?first_name=Olivier&last_name=Ronda+%3C3")
+	r = requests.get("http://localhost:" + hostname + "/cgi-bin/helloperl.pl?fname=Olivier&lname=Noob")
+	# r = requests.get("http://localhost:" + hostname + "/cgi-bin/helloworldpy.py?username=Olivier&password=Ronda+%3C3")
 
 	# if not (r.text.find("Hello Pouet pouet pouet") != -1 and r.status_code == 200):
 	# 	print("Wrong response: " + r.text)

@@ -19,7 +19,6 @@ function getCookie(cname)
 
 window.onload = function()
 {
-	console.log("test");
 	if (getCookie("webserv_username") != null)
 		document.getElementById("logged-in-username").innerHTML = "Hello " + getCookie("webserv_username");
 }

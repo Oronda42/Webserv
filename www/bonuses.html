@@ -19,7 +19,7 @@
 			<a href="javscript:void(0)" = class="closebtn" onclick="hideSideNav()">&times;</a>
 			
 			<a href="index.html">Home</a>
-			<a href="cgi.html">CGIs</a>
+			<!-- <a href="cgi.html">CGIs</a> -->
 			<a href="bonuses.html">Bonuses</a>
 		</div>
 
@@ -47,7 +47,7 @@
 			<div class="cgi-upload cgi">
 				<h1>This is a CGI to upload files</h1>
 				<form action="/cgi-bin/upload.py" method="POST" enctype="multipart/form-data">
-					<input class="file-upload" type="file">
+					<input class="file-upload" type="file" name="filename">
 					<button class="btn">Submit</button>
 				</form>
 			</div>
